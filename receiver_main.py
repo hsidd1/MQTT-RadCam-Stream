@@ -3,6 +3,10 @@ import time
 import yaml
 import subprocess
 
+"""
+PC client as subscriber of both device clients for logging received published data.
+"""
+
 def on_message(client, userdata, message):
     print("Received message: ", str(message.payload.decode("utf-8")))
 
@@ -20,7 +24,7 @@ def main():
     #client.subscribe("data") # subscribes to both radar and cam
     client.subscribe("data/radar")
     client.subscribe("data/camera")
-    time.sleep(30)
+    time.sleep(1)
     client.loop_stop()
 
 if __name__ == "__main__":

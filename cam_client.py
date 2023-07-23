@@ -33,6 +33,6 @@ while True:
     client.publish(topic="data/camera/frame", payload=msg, qos=0) # QoS 0 for frames
     timestamp = dt.datetime.now().isoformat()
     client.publish(topic="data/camera/ts", payload=timestamp, qos=1) # QoS 1 for timestamps
-    client.loop_stop()
+client.loop_stop()
 cap.release()
 cv2.destroyAllWindows()

@@ -22,9 +22,10 @@ if config["mqtt"]["show_log"]:
     client.on_message=on_message
 
 client.loop_start()
-
-for i in range(0, len(data), 10):
-    msg = data[i:i+10]  # modify to publish based on timestamps for intervals
-    client.publish(topic="data/radar", payload=str(msg), qos=0)
-time.sleep(4)
+while data:
+    for i in range(0, len(data), 10):
+        msg = data[i:i+10]  # modify to publish based on timestamps for intervals
+        data = data[i+10:]
+        client.publish(topic="data/radar", payload=str(msg), qos=0)
+    time.sleep(4)
 client.loop_stop()
