@@ -9,9 +9,9 @@ port = 1883
 def connect_mqtt(client_id) -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to MQTT Broker!")
+            print(f" {client_id}: Connected to MQTT Broker!")
         else:
-            print("Failed to connect, return code %d\n", rc)
+            print(client_id, "failed to connect, return code %d\n", rc)
 
     client = mqtt_client.Client(client_id)
     # client.username_pw_set(username, password)
