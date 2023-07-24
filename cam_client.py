@@ -7,11 +7,7 @@ from processModule.serverConnect import connect_mqtt
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
-
-#client = mqtt.Client(config["mqtt"]["client_id2"]) # camera
-#client.connect(config["mqtt"]["broker"]) 
-#client = connect_mqtt(config["mqtt"]["client_id2"]) # emqx web server
-#client.subscribe("data/radar") 
+CLIENT_ID = config["mqtt"]["client_id2"]
 
 def on_log(client, userdata, level, buf):
     print("log: ",buf)
@@ -35,22 +31,22 @@ def publish(client):
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
         if status == 0:
-            print(f"Send `{msg}` to topic `{topic}`")
+            print(f"{CLIENT_ID}: Send `{msg}` to topic `{topic}`")
         else:
-            print(f"Failed to send frame message to topic {topic}")
+            print(f"{CLIENT_ID}: Failed to send frame message to topic {topic}")
         timestamp = dt.datetime.now().isoformat()
         topic="data/camera/ts"
         res = client.publish(topic, payload=timestamp, qos=1) # QoS 1 for timestamps
         status = res[0]
         if status == 0:
-            print(f"Send `{timestamp}` to topic `{topic}`")
+            print(f"{CLIENT_ID}: Send `{timestamp}` to topic `{topic}`")
         else:
-            print(f"Failed to send timestamp message to topic {topic}")
+            print(f"{CLIENT_ID}: Failed to send timestamp message to topic {topic}")
 
 cap = cv2.VideoCapture(config["Files"]["video_file"])
 
 def run():
-    client = connect_mqtt(config["mqtt"]["client_id2"]) 
+    client = connect_mqtt(CLIENT_ID) 
     if config["mqtt"]["show_log"]:
         client.on_message=on_message
     client.loop_start()

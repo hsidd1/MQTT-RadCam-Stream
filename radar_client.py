@@ -6,11 +6,7 @@ from processModule.serverConnect import connect_mqtt
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
-
-#client = mqtt.Client(config["mqtt"]["client_id1"]) # radar
-#client.connect(config["mqtt"]["broker"])
-#client = connect_mqtt(config["mqtt"]["client_id1"]) # emqx web server
-# client.subscribe("data/camera") # receive frame data from cam topic
+CLIENT_ID = config["mqtt"]["client_id1"]
 
 def on_log(client, userdata, level, buf):
     print("log: ",buf)
@@ -39,14 +35,14 @@ def publish(client, data=data):
             res = client.publish(topic="data/radar", payload=str(msg), qos=0)
             status = res[0]
             if status == 0:
-                print(f"Send `{msg}` to topic `data/radar`")
+                print(f"{CLIENT_ID}: Send `{msg}` to topic `data/radar`")
             else:
-                print(f"Failed to send radar message to topic data/radar")
+                print(f"{CLIENT_ID}: Failed to send radar message to topic data/radar")
         if not data:
             break
 
 def run():
-    client = connect_mqtt(config["mqtt"]["client_id1"]) 
+    client = connect_mqtt(CLIENT_ID) 
     client.loop_start()
     publish(client)
     client.loop_stop()
