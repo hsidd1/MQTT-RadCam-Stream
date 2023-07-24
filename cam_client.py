@@ -24,9 +24,9 @@ def publish(client):
         time.sleep(3)
         if not ret:
             break
-        msg = frame.tobytes()
-        msg = str(msg)
-        msg = msg[0:10] # gibberish rn so just send 10 bytes
+        #print(f"frame object: {frame}")
+        # msg = str(frame.tobytes())[0:10]
+        msg = str(frame)
         topic="data/camera/frame"
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
