@@ -25,15 +25,16 @@ def publish(client):
         time.sleep(3)
         if not ret:
             break
-        # msg = str(frame.tobytes())[0:10]
-        #frame_id = cv2.CAP_PROP_POS_FRAMES # always 1 for some reason
         frame_id += 1
+        # for demo/debug: only send first 2x2 pixels of frame, else take actual array
+        if config["mqtt"]["compressed_output"]:
+            frame = frame[:2, :2]
         msg = f"f_id {frame_id}: {frame}"
         topic="data/camera/frame"
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
         if status == 0:
-            print(f"{CLIENT_ID}: Send `{msg}` to topic `{topic}`")
+            print(f"{CLIENT_ID}: Send `{msg}` to topic `{topic}`\n")
         else:
             print(f"{CLIENT_ID}: Failed to send frame message to topic {topic}")
         timestamp = dt.datetime.now().isoformat()
@@ -41,7 +42,7 @@ def publish(client):
         res = client.publish(topic, payload=timestamp, qos=1) # QoS 1 for timestamps
         status = res[0]
         if status == 0:
-            print(f"{CLIENT_ID}: Send `{timestamp}` to topic `{topic}`")
+            print(f"{CLIENT_ID}: Send `{timestamp}` to topic `{topic}`\n")
         else:
             print(f"{CLIENT_ID}: Failed to send timestamp message to topic {topic}")
 

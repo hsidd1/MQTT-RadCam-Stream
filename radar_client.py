@@ -32,10 +32,13 @@ def publish(client, data=data):
             data = data[i+10:]
             if not msg:
                 break # stop once msg becomes empty list 
+            # for demo/debug: only send 2 objects from the data slice
+            if config["mqtt"]["compressed_output"]:
+                msg = msg[:2]
             res = client.publish(topic="data/radar", payload=str(msg), qos=0)
             status = res[0]
             if status == 0:
-                print(f"{CLIENT_ID}: Send `{msg}` to topic `data/radar`")
+                print(f"{CLIENT_ID}: Send `{msg}` to topic `data/radar`\n")
             else:
                 print(f"{CLIENT_ID}: Failed to send radar message to topic data/radar")
         if not data:
