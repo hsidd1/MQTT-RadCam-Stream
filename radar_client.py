@@ -30,8 +30,8 @@ def publish(client, data=data):
     if config["mqtt"]["show_log"]:
         client.on_message=on_message
     while True:
-        time.sleep(4)
         for i in range(0, len(data), 10):
+            time.sleep(4)
             msg = data[i:i+10]  # modify to publish based on timestamps for intervals
             data = data[i+10:]
             if not msg:
