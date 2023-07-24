@@ -1,9 +1,9 @@
 mqtt:
-  broker: "mqtt.eclipseprojects.io"
+  broker: "mqtt.eclipseprojects.io" # alt server, use module connection now
   port: None 
   client_id1: "Radar"
   client_id2: "Camera"
-  show_log: False
+  show_log: True
 Files:
   radar_data_file: ./data/radardata.json
   video_file: ./data/camdata.avi
