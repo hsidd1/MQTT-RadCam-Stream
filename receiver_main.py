@@ -24,16 +24,13 @@ def subscribe(client, topic):
     client.on_message = on_message
 
 def main():
-    # subprocess.run(["python", "radar_client.py"])
-    # subprocess.run(["python", "cam_client.py"])
-    #client.subscribe("data") # subscribes to both radar and cam
-
+    subprocess.Popen(["python", "cam_client.py"])
+    subprocess.Popen(["python", "radar_client.py"])
     client = connect_mqtt("PC")
     subscribe(client, topic = "data/radar")
     subscribe(client, topic = "data/camera/frame")
     subscribe(client, topic = "data/camera/ts")
     client.loop_forever()
-    #time.sleep(1)
 
 if __name__ == "__main__":
     main()
