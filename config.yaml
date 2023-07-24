@@ -3,7 +3,7 @@ mqtt:
   port: None 
   client_id1: "Radar"
   client_id2: "Camera"
-  show_log: True
+  show_log: False
 Files:
   radar_data_file: ./data/radardata.json
   video_file: ./data/camdata.avi
