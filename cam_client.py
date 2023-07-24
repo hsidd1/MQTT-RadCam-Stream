@@ -27,16 +27,17 @@ if config["mqtt"]["show_log"]:
 
 cap = cv2.VideoCapture(config["Files"]["video_file"])
 
-# client.loop_start()
+client.loop_start()
 while True:
     ret, frame = cap.read()
     if not ret:
         break
     msg = frame.tobytes()
+    msg = str(msg)
     client.publish(topic="data/camera/frame", payload=msg, qos=0) # QoS 0 for frames
     timestamp = dt.datetime.now().isoformat()
     client.publish(topic="data/camera/ts", payload=timestamp, qos=1) # QoS 1 for timestamps
     time.sleep(1)
-# client.loop_stop()
+client.loop_stop()
 cap.release()
 cv2.destroyAllWindows()
