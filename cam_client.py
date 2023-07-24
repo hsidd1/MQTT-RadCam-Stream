@@ -19,14 +19,16 @@ def on_message(client, userdata, message):
     print("message retain flag=",message.retain)
 
 def publish(client):
+    frame_id = 0
     while True:
         ret, frame = cap.read()
         time.sleep(3)
         if not ret:
             break
-        #print(f"frame object: {frame}")
         # msg = str(frame.tobytes())[0:10]
-        msg = str(frame)
+        #frame_id = cv2.CAP_PROP_POS_FRAMES # always 1 for some reason
+        frame_id += 1
+        msg = f"f_id {frame_id}: {frame}"
         topic="data/camera/frame"
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
