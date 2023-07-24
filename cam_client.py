@@ -25,7 +25,7 @@ def on_message(client, userdata, message):
 def publish(client):
     while True:
         ret, frame = cap.read()
-        time.sleep(1)
+        time.sleep(3)
         if not ret:
             break
         msg = frame.tobytes()
