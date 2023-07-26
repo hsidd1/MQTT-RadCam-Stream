@@ -21,15 +21,16 @@ def on_message(client, userdata, message):
 def publish(client):
     frame_id = 0
     i = 0
-    frame_start = 50
+    frame_start = config["CameraOutput"]["frame_start"]
     while True:
         ret, frame = cap.read()
-        # on individual frame level, first couple of 'frames' are not even frames based on my observations, so skip
+        # first couple of 'frames' are not even frames based on my observations, so skip
         if i < frame_start:
             i += 1
             continue
         frame_id += 1
-        time.sleep(3)
+        if not config["CameraOutput"]["continuous_frame_mode"]:
+            time.sleep(3)
         if not ret:
             break
         # for demo/debug: only send first 2x2 pixels of frame, else take actual array
@@ -42,12 +43,16 @@ def publish(client):
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
         if status == 0:
-            print(f"{CLIENT_ID}: Send `{msg[:10]}` to topic `{topic}`\n")    
-            cv2.imshow(f"frame: {frame_id}", frame)
-            # wait until the user closes the window or presses ESC
-            key = cv2.waitKey(0) & 0xFF
-            if key == 27:
-                break
+            print(f"{CLIENT_ID}: Send `{msg[:10]}` to topic `{topic} (fid={frame_id})`\n")    
+            cv2.imshow(f"frame: {frame_id} (ESC to exit)", frame)
+            fps = config["CameraOutput"]["fps"]
+            frame_time = 1/fps
+            time.sleep(frame_time)
+            if not config["CameraOutput"]["continuous_frame_mode"]:
+                # wait until the user closes the window or presses ESC
+                key = cv2.waitKey(0) & 0xFF
+                if key == 27:
+                    break
             cv2.destroyAllWindows()
         else:
             print(f"{CLIENT_ID}: Failed to send frame message to topic {topic}")
