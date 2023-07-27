@@ -1,10 +1,14 @@
 mqtt:
-  broker: "mqtt.eclipseprojects.io" # alt server, use module connection now
+  broker: "mqtt.eclipseprojects.io" # alt server, use module connection now (emqx)
   port: None 
   client_id1: "Radar"
   client_id2: "Camera"
   show_log: False
-  compressed_output: True # for debugging/demo - send compressed data to console
+  compressed_output: False # for debugging/demo - send compressed data to console
 Files:
   radar_data_file: ./data/radardata.json
   video_file: ./data/camdata.avi
+CameraOutput:
+  fps: 1 # fps for image output step size
+  frame_start: 50 # which frame to start program at
+  continuous_frame_mode: False # if True, will run at fps, else waits for user key input

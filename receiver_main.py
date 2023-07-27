@@ -1,25 +1,36 @@
-import paho.mqtt.client as mqtt
+from processModule.serverConnect import connect_mqtt
+import cv2
+import numpy as np
 import time
 import yaml
 import subprocess
-from processModule.serverConnect import connect_mqtt
+
 """
 PC client as subscriber of both device clients for logging received published data.
 """
 
-def on_message(client, userdata, message):
-    print("Received message: ", str(message.payload.decode("utf-8")))
-
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-#client = mqtt.Client("PC")
-#client.connect(config["mqtt"]["broker"])
+def process_frames(frame_payload: bytearray) -> None:
+    # convert byte array to numpy array for cv2 to read
+    #frame = cv2.imdecode(np.frombuffer(frame_payload, np.uint8), -1)
+    frame = np.frombuffer(frame_payload, dtype=np.uint8)
+    sample_img = "data/sample_frame.png"
+    data_array = cv2.imread(sample_img)
+    height, width, channels = data_array.shape
+    frame = frame.reshape(height, width, channels)
+    cv2.imshow(f"Frame from {config['mqtt']['client_id2']}", frame)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
-        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
-
+        if msg.topic == "data/camera/frame":
+            print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
+            process_frames(msg.payload)
+        else:
+            print(f"Received {msg.payload.decode()} from topic {msg.topic}")
     client.subscribe(topic)
     client.on_message = on_message
 
@@ -30,7 +41,11 @@ def main():
     subscribe(client, topic = "data/radar")
     subscribe(client, topic = "data/camera/frame")
     subscribe(client, topic = "data/camera/ts")
-    client.loop_forever()
+    try:
+        client.loop_forever()
+    except KeyboardInterrupt:
+        print("Exiting Receiver...")
+        client.disconnect()
 
 if __name__ == "__main__":
     main()

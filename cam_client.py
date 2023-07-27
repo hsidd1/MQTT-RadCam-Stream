@@ -1,4 +1,3 @@
-import paho.mqtt.client as mqtt
 import cv2
 import yaml
 import datetime as dt
@@ -18,23 +17,31 @@ def on_message(client, userdata, message):
     print("message qos=",message.qos)
     print("message retain flag=",message.retain)
 
-def publish(client):
+def publish(client): 
     frame_id = 0
+    i = 0
+    frame_start = config["CameraOutput"]["frame_start"]
     while True:
         ret, frame = cap.read()
+        # first couple of 'frames' are not even frames based on my observations, so skip
+        if i < frame_start:
+            i += 1
+            continue
+        frame_id += 1
         time.sleep(3)
         if not ret:
             break
-        frame_id += 1
         # for demo/debug: only send first 2x2 pixels of frame, else take actual array
-        if config["mqtt"]["compressed_output"]:
+        if config["mqtt"]["compressed_output"]: # small frames for reducing data transfer
             frame = frame[:2, :2]
-        msg = f"f_id {frame_id}: {frame}"
+        msg_str = f"f_id {frame_id}: {frame}"
         topic="data/camera/frame"
+        #res = client.publish(topic, payload=msg_str, qos=0) # QoS 0 for frames
+        msg = bytearray(frame)
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
         if status == 0:
-            print(f"{CLIENT_ID}: Send `{msg}` to topic `{topic}`\n")
+            print(f"{CLIENT_ID}: Send `{msg[:10]}` to topic `{topic} (fid={frame_id})`\n")    
         else:
             print(f"{CLIENT_ID}: Failed to send frame message to topic {topic}")
         timestamp = dt.datetime.now().isoformat()
