@@ -17,7 +17,7 @@ def on_message(client, userdata, message):
     print("message qos=",message.qos)
     print("message retain flag=",message.retain)
 
-def publish(client): # make a constant window and write img over it and vis on receiver
+def publish(client): 
     frame_id = 0
     i = 0
     frame_start = config["CameraOutput"]["frame_start"]
@@ -28,8 +28,7 @@ def publish(client): # make a constant window and write img over it and vis on r
             i += 1
             continue
         frame_id += 1
-        if not config["CameraOutput"]["continuous_frame_mode"]:
-            time.sleep(3)
+        time.sleep(3)
         if not ret:
             break
         # for demo/debug: only send first 2x2 pixels of frame, else take actual array
@@ -43,16 +42,6 @@ def publish(client): # make a constant window and write img over it and vis on r
         status = res[0]
         if status == 0:
             print(f"{CLIENT_ID}: Send `{msg[:10]}` to topic `{topic} (fid={frame_id})`\n")    
-            cv2.imshow(f"frame: {frame_id} (ESC to exit)", frame)
-            fps = config["CameraOutput"]["fps"]
-            frame_time = 1/fps
-            time.sleep(frame_time)
-            if not config["CameraOutput"]["continuous_frame_mode"]:
-                # wait until the user closes the window or presses ESC
-                key = cv2.waitKey(0) & 0xFF
-                if key == 27:
-                    break
-            cv2.destroyAllWindows()
         else:
             print(f"{CLIENT_ID}: Failed to send frame message to topic {topic}")
         timestamp = dt.datetime.now().isoformat()
