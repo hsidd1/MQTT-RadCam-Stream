@@ -56,14 +56,19 @@ def publish(client):
 cap = cv2.VideoCapture(config["Files"]["video_file"])
 
 def run():
-    client = connect_mqtt(CLIENT_ID) 
-    if config["mqtt"]["show_log"]:
-        client.on_message=on_message
-    client.loop_start()
-    publish(client)
-    client.loop_stop()
-    cap.release()
-    cv2.destroyAllWindows()
-
+    try:
+        client = connect_mqtt(CLIENT_ID) 
+        if config["mqtt"]["show_log"]:
+            client.on_message=on_message
+        client.loop_start()
+        publish(client)
+        client.loop_stop()
+        cap.release()
+        cv2.destroyAllWindows()
+    except KeyboardInterrupt:
+        print("Exiting Camera Client...")
+        client.disconnect()
+        cap.release()
+        cv2.destroyAllWindows()
 if __name__ == '__main__':
     run()

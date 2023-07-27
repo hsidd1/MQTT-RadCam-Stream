@@ -44,10 +44,14 @@ def publish(client, data=data):
             break
 
 def run():
-    client = connect_mqtt(CLIENT_ID) 
-    client.loop_start()
-    publish(client)
-    client.loop_stop()
+    try:
+        client = connect_mqtt(CLIENT_ID) 
+        client.loop_start()
+        publish(client)
+        client.loop_stop()
+    except KeyboardInterrupt:     
+        print("Exiting Radar Client...")
+        client.disconnect()
 
 if __name__ == "__main__":
     run()

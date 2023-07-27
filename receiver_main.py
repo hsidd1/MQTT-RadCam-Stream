@@ -1,7 +1,6 @@
 from processModule.serverConnect import connect_mqtt
 import cv2
 import numpy as np
-import time
 import yaml
 import subprocess
 
@@ -35,8 +34,8 @@ def subscribe(client, topic):
     client.on_message = on_message
 
 def main():
-    subprocess.Popen(["python", "cam_client.py"])
-    subprocess.Popen(["python", "radar_client.py"])
+    camera_process = subprocess.Popen(["python", "cam_client.py"])
+    radar_process = subprocess.Popen(["python", "radar_client.py"])
     client = connect_mqtt("PC")
     subscribe(client, topic = "data/radar")
     subscribe(client, topic = "data/camera/frame")
@@ -45,6 +44,10 @@ def main():
         client.loop_forever()
     except KeyboardInterrupt:
         print("Exiting Receiver...")
+        camera_process.kill()
+        print("Camera process killed.") 
+        radar_process.kill()
+        print("Radar process killed.") # RIP my friends
         client.disconnect()
 
 if __name__ == "__main__":
