@@ -1,4 +1,3 @@
-import paho.mqtt.client as mqtt
 import cv2
 import yaml
 import datetime as dt
@@ -18,7 +17,7 @@ def on_message(client, userdata, message):
     print("message qos=",message.qos)
     print("message retain flag=",message.retain)
 
-def publish(client):
+def publish(client): # make a constant window and write img over it and vis on receiver
     frame_id = 0
     i = 0
     frame_start = config["CameraOutput"]["frame_start"]

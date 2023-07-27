@@ -1,6 +1,5 @@
-import paho.mqtt.client as mqtt
-import yaml
 from processModule.rd_process import data
+import yaml
 import time
 from processModule.serverConnect import connect_mqtt
 

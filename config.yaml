@@ -11,4 +11,4 @@ Files:
 CameraOutput:
   fps: 1 # fps for image output step size
   frame_start: 50 # which frame to start program at
-  continuous_frame_mode: False # if True, will run at fps, else waits for user key input
+  continuous_frame_mode: True # if True, will run at fps, else waits for user key input

@@ -1,8 +1,7 @@
-import paho.mqtt.client as mqtt
-import time
+from processModule.serverConnect import connect_mqtt
 import yaml
 import subprocess
-from processModule.serverConnect import connect_mqtt
+
 """
 PC client as subscriber of both device clients for logging received published data.
 """
@@ -12,9 +11,6 @@ def on_message(client, userdata, message):
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
-
-#client = mqtt.Client("PC")
-#client.connect(config["mqtt"]["broker"])
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
