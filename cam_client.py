@@ -58,17 +58,23 @@ cap = cv2.VideoCapture(config["Files"]["video_file"])
 def run():
     try:
         client = connect_mqtt(CLIENT_ID) 
+        def exit_handler(client):
+            cap.release()
+            client.disconnect()
+            cv2.destroyAllWindows()
+
         if config["mqtt"]["show_log"]:
             client.on_message=on_message
         client.loop_start()
         publish(client)
-        client.loop_stop()
-        cap.release()
-        cv2.destroyAllWindows()
+        exit_handler(client)
     except KeyboardInterrupt:
-        print("Exiting Camera Client...")
-        client.disconnect()
-        cap.release()
-        cv2.destroyAllWindows()
+        print("Camera Process Terminated. Exiting Camera Client...")
+        exit_handler(client)
+    except Exception as e:
+        print("Something went wrong. Exiting Camera Client...")
+        print(e)
+        exit_handler(client)
+
 if __name__ == '__main__':
     run()

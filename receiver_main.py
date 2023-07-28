@@ -11,6 +11,8 @@ PC client as subscriber of both device clients for logging received published da
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
+cv2.namedWindow(f"Frame from {config['mqtt']['client_id2']}", cv2.WINDOW_NORMAL)
+
 def process_frames(frame_payload: bytearray) -> None:
     # convert byte array to numpy array for cv2 to read
     #frame = cv2.imdecode(np.frombuffer(frame_payload, np.uint8), -1)
@@ -21,7 +23,6 @@ def process_frames(frame_payload: bytearray) -> None:
     frame = frame.reshape(height, width, channels)
     cv2.imshow(f"Frame from {config['mqtt']['client_id2']}", frame)
     cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
@@ -40,15 +41,23 @@ def main():
     subscribe(client, topic = "data/radar")
     subscribe(client, topic = "data/camera/frame")
     subscribe(client, topic = "data/camera/ts")
-    try:
-        client.loop_forever()
-    except KeyboardInterrupt:
-        print("Exiting Receiver...")
+
+    def exit_handler(client):
         camera_process.kill()
         print("Camera process killed.") 
         radar_process.kill()
         print("Radar process killed.") # RIP my friends
         client.disconnect()
+        cv2.destroyAllWindows()
+    try:
+        client.loop_forever()
+    except KeyboardInterrupt:
+        print("Process Terminated. Exiting Receiver...")
+        exit_handler(client)
+    except Exception as e:
+        print("Something went wrong. Exiting Receiver...")
+        print(e)
+        exit_handler(client)
 
 if __name__ == "__main__":
     main()

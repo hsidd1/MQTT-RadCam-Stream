@@ -50,7 +50,11 @@ def run():
         publish(client)
         client.loop_stop()
     except KeyboardInterrupt:     
-        print("Exiting Radar Client...")
+        print("Radar Process Terminated. Exiting Radar Client...")
+        client.disconnect()
+    except Exception as e:
+        print("Something went wrong. Exiting Radar Client...")
+        print(e)
         client.disconnect()
 
 if __name__ == "__main__":
