@@ -4,7 +4,7 @@ mqtt:
   client_id1: "Radar"
   client_id2: "Camera"
   show_log: False
-  compressed_output: False # for debugging/demo - send compressed data to console
+  compressed_output: True # for debugging/demo - send compressed data to console
 Files:
   radar_data_file: ./data/radardata.json
   video_file: ./data/camdata.avi
