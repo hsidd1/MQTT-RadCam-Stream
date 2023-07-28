@@ -7,23 +7,19 @@ with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 CLIENT_ID = config["mqtt"]["client_id1"]
 
-def on_log(client, userdata, level, buf):
-    print("log: ",buf)
-# client.on_log=on_log
-def on_message(client, userdata, message):
-    print("message received " ,str(message.payload.decode("utf-8")))
-    print("message topic=",message.topic)
-    print("message qos=",message.qos)
-    print("message retain flag=",message.retain)
-
 def publish(client, data=data):
     def on_message(client, userdata, message):
         print("message received " ,str(message.payload.decode("utf-8")))
         print("message topic=",message.topic)
         print("message qos=",message.qos)
         print("message retain flag=",message.retain)
+    def on_log(client, userdata, level, buf):
+        print("log: ",buf)
+        
     if config["mqtt"]["show_log"]:
         client.on_message=on_message
+        #client.on_log=on_log
+
     while True:
         for i in range(0, len(data), 10):
             time.sleep(4)

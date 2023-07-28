@@ -10,7 +10,7 @@ CLIENT_ID = config["mqtt"]["client_id2"]
 
 def on_log(client, userdata, level, buf):
     print("log: ",buf)
-# client.on_log=on_log
+
 def on_message(client, userdata, message):
     print("message received " ,str(message.payload.decode("utf-8")))
     print("message topic=",message.topic)
@@ -65,6 +65,8 @@ def run():
 
         if config["mqtt"]["show_log"]:
             client.on_message=on_message
+            # client.on_log=on_log
+
         client.loop_start()
         publish(client)
         exit_handler(client)
