@@ -40,7 +40,11 @@ Configuration for this project's key parameters are in [config.yaml](config.yaml
 Execute main receiver to automatically subscribe to topics and run client programs as subprocesses in parallel
 ```bash
 # publish and subscribe
-python receiver_main.py
+python main.py
+```
+Or just run receiver client individually without subprocesses to receiver messages externally:
+```bash
+python receiver_client.py
 ```
 (Optional) Run publishing clients individually:
 ```bash
