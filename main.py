@@ -5,20 +5,21 @@ import yaml
 import subprocess
 
 """
-PC client as subscriber of both device clients for logging received published data.
+Receiver client as subscriber of both device clients for logging and processing
+received published data. Runs subprocesses in parallel automatically.
 """
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 cv2.namedWindow(f"Frame from {config['mqtt']['client_id2']}", cv2.WINDOW_NORMAL)
+SAMPLE_IMG = "data/sample_frame.png"
+data_array = cv2.imread(SAMPLE_IMG)
 
 def process_frames(frame_payload: bytearray) -> None:
     # convert byte array to numpy array for cv2 to read
     #frame = cv2.imdecode(np.frombuffer(frame_payload, np.uint8), -1)
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
-    sample_img = "data/sample_frame.png"
-    data_array = cv2.imread(sample_img)
     height, width, channels = data_array.shape
     frame = frame.reshape(height, width, channels)
     cv2.imshow(f"Frame from {config['mqtt']['client_id2']}", frame)
