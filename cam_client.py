@@ -34,9 +34,7 @@ def publish(client):
         time.sleep(3)
         if not ret:
             break
-        # for demo/debug: only send first 2x2 pixels of frame, else take actual array
-        if config["mqtt"]["compressed_output"]: # small frames for reducing data transfer
-            frame = frame[:2, :2]
+        
         msg_str = f"f_id {frame_id}: {frame}"
         topic="data/camera/frame"
         #res = client.publish(topic, payload=msg_str, qos=0) # QoS 0 for frames
@@ -44,7 +42,10 @@ def publish(client):
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
         if status == 0:
-            print(f"{CLIENT_ID}: Send `{msg[:10]}` to topic `{topic} (fid={frame_id})`\n")    
+            if config["mqtt"]["compressed_output"]:
+                print(f"{CLIENT_ID}: Send `{msg[:10]}` to topic `{topic} (fid={frame_id})`\n")
+            else:
+                print(f"{CLIENT_ID}: Send `{msg}` to topic `{topic} (fid={frame_id})`\n")    
         else:
             print(f"{CLIENT_ID}: Failed to send frame message to topic {topic}")
         timestamp = dt.datetime.now().isoformat()
