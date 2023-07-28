@@ -35,18 +35,18 @@ Configuration for this project's key parameters are in [config.yaml](config.yaml
 - `frame_start`: (int) Frame to begin transfer at. First few frames do not process. Use to jump to specific frame id.
 - `continuous_frame_mode`: (bool) If `True`, Displays incoming frames without waiting for user to close window (simulate video playback).
 
-  ## Usage
-  
-  Execute main receiver to automatically subscribe to topics and run client programs as subprocesses in parallel
-  ```bash
-  # publish and subscribe
-  python receiver_main.py
-  ```
-  (Optional) Run publishing clients individually:
-  ```bash
-  # run camera client
-  python cam_client.py
-  # run radar client
-  python radar_client.py
-  ```
+## Usage
+
+Execute main receiver to automatically subscribe to topics and run client programs as subprocesses in parallel
+```bash
+# publish and subscribe
+python receiver_main.py
+```
+(Optional) Run publishing clients individually:
+```bash
+# run camera client
+python cam_client.py
+# run radar client
+python radar_client.py
+```
   
