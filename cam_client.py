@@ -12,7 +12,10 @@ def on_log(client, userdata, level, buf):
     print("log: ",buf)
 
 def on_message(client, userdata, message):
-    print("message received " ,str(message.payload.decode("utf-8")))
+    if message.topic == "data/camera/frame":
+        print(f"Received {len(message.payload)} bytes from topic {message.topic}")
+    else:
+     print("message received " ,str(message.payload.decode("utf-8")))
     print("message topic=",message.topic)
     print("message qos=",message.qos)
     print("message retain flag=",message.retain)
