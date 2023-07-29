@@ -33,6 +33,7 @@ Configuration for this project's key parameters are in [config.yaml](config.yaml
 
 - `fps`: (int) Number of frames to be transmitted per second.
 - `frame_start`: (int) Frame to begin transfer at. First few frames do not process. Use to jump to specific frame id.
+- `frame_skip`: (int) Send every nth frame. Ex. `frame_skip = 30` sends every 30th frame.
 - `continuous_frame_mode`: (bool) If `True`, Displays incoming frames without waiting for user to close window (simulate video playback).
 
 ## Usage
