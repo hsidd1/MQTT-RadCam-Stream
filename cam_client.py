@@ -24,6 +24,7 @@ def publish(client):
     frame_id = 0
     i = 0
     frame_start = config["CameraOutput"]["frame_start"]
+    frame_skip = config["CameraOutput"]["frame_skip"]
     while True:
         ret, frame = cap.read()
         # first couple of 'frames' are not even frames based on my observations, so skip
@@ -31,13 +32,15 @@ def publish(client):
             i += 1
             continue
         frame_id += 1
-        time.sleep(3)
+        if frame_id % frame_skip != 0:
+            i+=1 
+            continue
+    
         if not ret:
             break
         
         msg_str = f"f_id {frame_id}: {frame}"
         topic="data/camera/frame"
-        #res = client.publish(topic, payload=msg_str, qos=0) # QoS 0 for frames
         msg = bytearray(frame)
         res = client.publish(topic, payload=msg, qos=0) # QoS 0 for frames
         status = res[0]
@@ -56,6 +59,8 @@ def publish(client):
             print(f"{CLIENT_ID}: Send `{timestamp}` to topic `{topic}`\n")
         else:
             print(f"{CLIENT_ID}: Failed to send timestamp message to topic {topic}")
+        time.sleep(3)
+        i+=1
 
 cap = cv2.VideoCapture(config["Files"]["video_file"])
 
