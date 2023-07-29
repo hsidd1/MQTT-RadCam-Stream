@@ -18,12 +18,14 @@ data_array = cv2.imread(SAMPLE_IMG)
 
 def process_frames(frame_payload: bytearray) -> None:
     # convert byte array to numpy array for cv2 to read
-    #frame = cv2.imdecode(np.frombuffer(frame_payload, np.uint8), -1)
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
     height, width, channels = data_array.shape
     frame = frame.reshape(height, width, channels)
     cv2.imshow(f"Frame from {config['mqtt']['client_id2']}", frame)
-    cv2.waitKey(0)
+    if config["CameraOutput"]["continuous_frame_mode"]:
+        cv2.waitKey(1)
+    else:
+        cv2.waitKey(0)
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):

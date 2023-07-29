@@ -22,7 +22,10 @@ def process_frames(frame_payload: bytearray) -> None:
     height, width, channels = data_array.shape
     frame = frame.reshape(height, width, channels)
     cv2.imshow(f"Frame from {config['mqtt']['client_id2']}", frame)
-    cv2.waitKey(0)
+    if config["CameraOutput"]["continuous_frame_mode"]:
+        cv2.waitKey(1)
+    else:
+        cv2.waitKey(0)
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
