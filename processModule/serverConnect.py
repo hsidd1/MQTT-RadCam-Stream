@@ -1,8 +1,11 @@
 from paho.mqtt import client as mqtt_client
+import yaml
 
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
 
-broker = 'broker.emqx.io'
-port = 1883
+broker = config["mqtt"]["broker"]
+port = config["mqtt"]["port"]
 
 def connect_mqtt(client_id) -> mqtt_client:
     def on_connect(client, userdata, flags, rc):

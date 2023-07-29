@@ -1,6 +1,6 @@
 mqtt:
-  broker: "mqtt.eclipseprojects.io" # alt server, use module connection now (emqx)
-  port: None 
+  broker: "broker.emqx.io"
+  port: 1883
   client_id1: "Radar"
   client_id2: "Camera"
   show_log: False
