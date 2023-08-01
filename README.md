@@ -38,6 +38,20 @@ Configuration for this project's key parameters are in [config.yaml](config.yaml
 
 ## Usage
 
+### Local Host Broker Setup
+
+This program requires a very rapid subscribe and publish rate which all tested web-based brokers could not accomplish. The workaround here is running on localhost server. 
+
+- Install Eclipse Mosquitto: https://mosquitto.org/download/
+- Open terminal as administrator:
+```bash
+cd <path-to-mosquitto>
+net start mosquitto # run broker
+```
+- Ensure config for `broker` is set to localhost: `"127.0.0.1"`
+
+### Publishing, Receiving and Processing 
+
 Execute main receiver to automatically subscribe to topics and run client programs as subprocesses in parallel
 ```bash
 # publish and subscribe
@@ -53,4 +67,10 @@ To run publishing clients individually:
 python cam_client.py
 # run radar client
 python radar_client.py
+```
+Disconnect broker when completed:
+```bash
+# open as administrator
+cd <path-to-mosquitto>
+net stop mosquitto
 ```

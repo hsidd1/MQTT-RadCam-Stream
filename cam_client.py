@@ -59,7 +59,7 @@ def publish(client):
             print(f"{CLIENT_ID}: Send `{timestamp}` to topic `{topic}`\n")
         else:
             print(f"{CLIENT_ID}: Failed to send timestamp message to topic {topic}")
-        time.sleep(0.5)
+        time.sleep(0.033)
         i+=1
 
 cap = cv2.VideoCapture(config["Files"]["video_file"])
