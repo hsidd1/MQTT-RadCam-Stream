@@ -35,10 +35,8 @@ def publish(client):
         if frame_id % frame_skip != 0:
             i+=1 
             continue
-    
         if not ret:
-            break
-        
+            break 
         msg_str = f"f_id {frame_id}: {frame}"
         topic="data/camera/frame"
         msg = bytearray(frame)
@@ -51,31 +49,29 @@ def publish(client):
                 print(f"{CLIENT_ID}: Send `{msg}` to topic `{topic} (fid={frame_id})`\n")    
         else:
             print(f"{CLIENT_ID}: Failed to send frame message to topic {topic}")
-        timestamp = dt.datetime.now().isoformat()
-        topic="data/camera/ts"
-        res = client.publish(topic, payload=timestamp, qos=1) # QoS 1 for timestamps
-        status = res[0]
-        if status == 0:
-            print(f"{CLIENT_ID}: Send `{timestamp}` to topic `{topic}`\n")
-        else:
-            print(f"{CLIENT_ID}: Failed to send timestamp message to topic {topic}")
-        time.sleep(0.5)
+        # timestamp = dt.datetime.now().isoformat()
+        # topic="data/camera/ts"
+        # res = client.publish(topic, payload=timestamp, qos=1) # QoS 1 for timestamps
+        # status = res[0]
+        # if status == 0:
+        #     print(f"{CLIENT_ID}: Send `{timestamp}` to topic `{topic}`\n")
+        # else:
+        #     print(f"{CLIENT_ID}: Failed to send timestamp message to topic {topic}")
+        time.sleep(0.033)
         i+=1
 
 cap = cv2.VideoCapture(config["Files"]["video_file"])
 
 def run():
+    def exit_handler(client):
+        cap.release()
+        client.disconnect()
+        cv2.destroyAllWindows()
     try:
         client = connect_mqtt(CLIENT_ID) 
-        def exit_handler(client):
-            cap.release()
-            client.disconnect()
-            cv2.destroyAllWindows()
-
         if config["mqtt"]["show_log"]:
             client.on_message=on_message
             # client.on_log=on_log
-
         client.loop_start()
         publish(client)
         exit_handler(client)
