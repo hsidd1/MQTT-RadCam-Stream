@@ -65,17 +65,15 @@ def publish(client):
 cap = cv2.VideoCapture(config["Files"]["video_file"])
 
 def run():
+    def exit_handler(client):
+        cap.release()
+        client.disconnect()
+        cv2.destroyAllWindows()
     try:
         client = connect_mqtt(CLIENT_ID) 
-        def exit_handler(client):
-            cap.release()
-            client.disconnect()
-            cv2.destroyAllWindows()
-
         if config["mqtt"]["show_log"]:
             client.on_message=on_message
             # client.on_log=on_log
-
         client.loop_start()
         publish(client)
         exit_handler(client)
