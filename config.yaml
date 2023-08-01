@@ -1,5 +1,5 @@
 mqtt:
-  broker: "broker.emqx.io"
+  broker: "127.0.0.1" # alt web broker: "broker.emqx.io"
   port: 1883
   client_id1: "Radar"
   client_id2: "Camera"
@@ -11,5 +11,5 @@ Files:
 CameraOutput:
   fps: 1 # fps for image output step size
   frame_start: 50 # which frame to start program at
-  frame_skip: 3 # show every nth frame
+  frame_skip: 1 # show every nth frame
   continuous_frame_mode: True # if True, will update display frames automatically, else waits for user key input
