@@ -36,6 +36,8 @@ Configuration for this project's key parameters are in [config.yaml](config.yaml
 - `frame_skip`: (int) Send every nth frame. Ex. `frame_skip = 30` sends every 30th frame.
 - `continuous_frame_mode`: (bool) If `True`, Displays incoming frames without waiting for user to close window (simulate video playback).
 
+`write_log`: (bool) If `True`, write receiving logs to a log file.
+
 ## Usage
 
 ### Local Host Broker Setup
@@ -56,6 +58,8 @@ Execute main receiver to automatically subscribe to topics and run client progra
 ```bash
 # publish and subscribe
 python main.py
+#Optional additional flag for logging:
+python main.py <log-file-path> # change log file path
 ```
 To run receiver client only without other clients activating:
 ```bash

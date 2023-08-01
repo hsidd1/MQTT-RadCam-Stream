@@ -13,4 +13,4 @@ CameraOutput:
   frame_start: 0 # which frame to start program at
   frame_skip: 1 # show every nth frame
   continuous_frame_mode: True # if True, will update display frames automatically, else waits for user key input
-write_log: True # write log file
+write_log: False # write log file
