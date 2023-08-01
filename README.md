@@ -45,7 +45,7 @@ This program requires a very rapid subscribe and publish rate which all tested w
 - Install Eclipse Mosquitto: https://mosquitto.org/download/
 - Open terminal as administrator:
 ```bash
-cd <path to mosquitto>
+cd <path-to-mosquitto>
 net start mosquitto # run broker
 ```
 - Ensure config for `broker` is set to localhost: `"127.0.0.1"`
@@ -67,4 +67,10 @@ To run publishing clients individually:
 python cam_client.py
 # run radar client
 python radar_client.py
+```
+Disconnect broker when completed:
+```bash
+# open as administrator
+cd <path-to-mosquitto>
+net stop mosquitto
 ```
