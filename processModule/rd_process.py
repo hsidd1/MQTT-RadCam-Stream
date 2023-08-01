@@ -28,3 +28,7 @@ def rd_process():
     return radar_points
 
 data = rd_process()
+
+def process_radar(radar_payload: list[dict]) -> None:
+    # TODO: generate text and data points from radar data to plot over image
+    raise NotImplementedError
