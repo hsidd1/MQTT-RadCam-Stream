@@ -27,16 +27,22 @@ if os.path.exists(LOG_FILE):
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
+        frame_payload = "None"
+        ts_pub = "None"
         if msg.topic == "data/camera/frame":
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
-            process_frames(msg.payload) # display frames in cv2 window
-            msg_decode = str(bytearray(msg.payload))
+            frame_payload = msg.payload
+            # process_frames(msg.payload) # display frames in cv2 window
+            # msg_decode = str(bytearray(msg.payload))
         else:
             print(f"Received {msg.payload.decode()} from topic {msg.topic}")
-            msg_decode = msg.payload.decode()
-        if config["write_log"]:
-            with open(LOG_FILE, "a") as f:
-                f.write(f"{dt.datetime.now().isoformat()}: Received {msg_decode} from {msg.topic}\n")
+            # msg_decode = msg.payload.decode()
+            ts_pub = msg.payload.decode()
+        if frame_payload != "None" and ts_pub != "None":
+            process_frames(frame_payload, ts_pub)
+        # if config["write_log"] and msg_decode != "None":
+        #     with open(LOG_FILE, "a") as f:
+        #         f.write(f"{dt.datetime.now().isoformat()}: Received {msg_decode} from {msg.topic}\n")
 
     client.subscribe(topic)
     client.on_message = on_message
@@ -47,7 +53,7 @@ def main():
     client = connect_mqtt("PC")
     subscribe(client, topic = "data/radar")
     subscribe(client, topic = "data/camera/frame")
-    #subscribe(client, topic = "data/camera/ts")
+    subscribe(client, topic = "data/camera/ts")
 
     def exit_handler(client):
         camera_process.kill()
