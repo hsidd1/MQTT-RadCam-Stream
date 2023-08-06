@@ -18,6 +18,7 @@ def process_frames(frame_payload: bytearray, ts_pub) -> None:
     if config["write_log"]: # write frame with timestamp as name to logs/frames
         filename = f"logs/frames/{ts_pub}.jpg"
         cv2.imwrite(filename, frame)
+        print(f"Frame saved to {filename}")
     if config["CameraOutput"]["continuous_frame_mode"]:
         cv2.waitKey(1)
     else:

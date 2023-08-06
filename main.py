@@ -6,6 +6,7 @@ import datetime as dt
 import yaml
 import subprocess
 from processModule.cam_process import process_frames
+import traceback
 
 """
 Receiver client as subscriber of both device clients for logging and processing
@@ -25,10 +26,11 @@ if os.path.exists(LOG_FILE):
         idx += 1
     log_file_path = f"{base}_{idx}{ext}"
 
+frame_payload = "None"
+ts_pub = "None"
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
-        frame_payload = "None"
-        ts_pub = "None"
+        global frame_payload, ts_pub
         if msg.topic == "data/camera/frame":
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
             frame_payload = msg.payload
@@ -69,7 +71,8 @@ def main():
         exit_handler(client)
     except Exception as e:
         print("Something went wrong. Exiting Receiver...")
-        print(e)
+        #print(e)
+        traceback.print_exc()
         exit_handler(client)
 
 if __name__ == "__main__":
