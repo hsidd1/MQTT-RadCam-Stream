@@ -55,7 +55,7 @@ def main():
     client = connect_mqtt("PC")
     subscribe(client, topic = "data/radar")
     subscribe(client, topic = "data/camera/frame")
-    subscribe(client, topic = "data/camera/ts")
+    #subscribe(client, topic = "data/camera/ts")
 
     def exit_handler(client):
         camera_process.kill()
