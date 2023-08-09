@@ -13,7 +13,7 @@ configFileName = 'ODS_6m_default.cfg'
 #configFileName = 'ISK_6m_default.cfg'
 #configFileName = 'new_cfg.cfg'
 #configFileName = 'demo.cfg'
-
+write_radar = False
 CLIport = {}
 Dataport = {}
 byteBuffer = np.zeros(2**15,dtype = 'uint8')
@@ -437,12 +437,12 @@ def readAndParseData14xx(Dataport, configParameters):
                 # Store the data in the detObj dictionary
                 detObj = {"TLV_type":tlv_type,"frame":frameNumber,"tid": targets[:,0], "x": targets[:,1], "y": targets[:,2], "z": targets[:,3]}
                 detObj_log = json.dumps({"TLV_type":int(tlv_type), "frame":int(frameNumber),"tid": targets[:,0].tolist(), "x": targets[:,1].tolist(), "y": targets[:,2].tolist(), "z": targets[:,3].tolist()})
-                
-                with open('tlv_data_log.json', 'a') as file:
-                    file.write(str(detObj_log)+',\n')
-                
-                with open('tagets_data_log.json', 'a') as file:
-                    file.write(str(detObj_log)+',\n')
+                if write_radar:
+                    with open('data/tlv_data_log.json', 'a') as file:
+                        file.write(str(detObj_log)+',\n')
+                    
+                    with open('data/targets_data_log.json', 'a') as file:
+                        file.write(str(detObj_log)+',\n')
                 '''
                 with open("sample_file.json", "a") as file:
                     json.dump(detObj_log, file)
