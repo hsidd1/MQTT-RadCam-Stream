@@ -36,12 +36,13 @@ def subscribe(client, topic):
             frame_payload = msg.payload
             # process_frames(msg.payload) # display frames in cv2 window
             # msg_decode = str(bytearray(msg.payload))
+            if frame_payload != "None" and ts_pub != "None":
+                process_frames(frame_payload, ts_pub)
         else:
             print(f"Received {msg.payload.decode()} from topic {msg.topic}")
             # msg_decode = msg.payload.decode()
             ts_pub = msg.payload.decode()
-        if frame_payload != "None" and ts_pub != "None":
-            process_frames(frame_payload, ts_pub)
+        
         # if config["write_log"] and msg_decode != "None":
         #     with open(LOG_FILE, "a") as f:
         #         f.write(f"{dt.datetime.now().isoformat()}: Received {msg_decode} from {msg.topic}\n")
