@@ -1,7 +1,11 @@
-from processModule.rd_process import data
+from processModule.radar_process import data
 import yaml
 import time
 from processModule.serverConnect import connect_mqtt
+
+"""
+Processed JSON publisher
+"""
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)

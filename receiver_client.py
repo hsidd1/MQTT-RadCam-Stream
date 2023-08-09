@@ -1,7 +1,7 @@
 from processModule.serverConnect import connect_mqtt
 import cv2
 import yaml
-from processModule.cam_process import process_frames
+from processModule.camera_process import process_frames
 """
 Receiver client as subscriber of both device clients for logging received published data.
 Strictly runs receiver client only, so device clients can be run externally or separately.
