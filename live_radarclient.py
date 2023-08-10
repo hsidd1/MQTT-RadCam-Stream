@@ -6,7 +6,14 @@ import struct
 import json
 #import pyqtgraph.opengl as gl
 from processModule.serverConnect import connect_mqtt
+import yaml 
 
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
+
+# MQTT identifiers
+TOPIC = config["LiveData"]["radar"]["topic"]
+CLIENT_ID = config["LiveData"]["radar"]["client_id"]
 # Change the configuration file name
 #configFileName = 'xwr68xxconfig.cfg'
 configFileName = 'ODS_6m_default.cfg'
@@ -26,6 +33,7 @@ def serialConfig(configFileName):
     
     global CLIport
     global Dataport
+    global config
     # Open the serial ports for the configuration and the data ports
     
     # Raspberry pi
@@ -33,9 +41,17 @@ def serialConfig(configFileName):
     #Dataport = serial.Serial('/dev/ttyACM1', 921600)
     
     # Windows
-    CLIport = serial.Serial('COM3', 115200)
-    Dataport = serial.Serial('COM4', 921600)
-
+    str_cliport = config["LiveData"]["radar"]["CLIport"]
+    str_dataport = config["LiveData"]["radar"]["DataPort"]
+    CLIport = serial.Serial(str_cliport, 115200)
+    Dataport = serial.Serial(str_dataport, 921600)
+    # on reconnect, wait for the port to come back
+    time.sleep(1)
+    # flush buffers
+    CLIport.flushInput()
+    CLIport.flushOutput()
+    Dataport.flushInput()
+    Dataport.flushOutput()
     # Read the configuration file and send it to the board
     config = [line.rstrip('\r\n') for line in open(configFileName)]
     for i in config:
@@ -215,13 +231,13 @@ def readAndParseData14xx(Dataport, configParameters):
     print(type(readBuffer))
     msg = bytearray(readBuffer)
     print(type(msg))
-    res = client.publish(topic="data/liveradar", payload=str(msg), qos=0)
+    res = client.publish(topic=TOPIC, payload=str(msg), qos=0)
     status = res[0]
     if status == 0:
         msg_str = readBuffer[:10]
-        print(f"LIVE RADAR: Send `{msg_str}` to topic `data/liveradar`\n")
+        print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n")
     else:
-        print(f"LIVE RADAR: Failed to send radar message to topic data/liveradar")
+        print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
     #print(readBuffer)
     print('----------------------------------------------------------------------------------------------')
     '''
@@ -398,9 +414,9 @@ def readAndParseData14xx(Dataport, configParameters):
                 pointCloud[:,2] = sphericalPointCloud[:,0] * np.sin(sphericalPointCloud[:,2])
                 detObj = {"TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
                 detObj_log = json.dumps({"TLV_type":int(tlv_type),"frame":int(frameNumber), "x": pointCloud[:,0].tolist(), "y": pointCloud[:,1].tolist(), "z": pointCloud[:,2].tolist()})
-                
-                with open('tlv_data_log.json', 'a') as file:
-                    file.write(str(detObj_log)+',\n')
+                if write_radar:
+                    with open('data/tlv_data_log.json', 'a') as file:
+                        file.write(str(detObj_log)+',\n')
                 
             ##########################---Target List TLV---############################
             elif tlv_type == MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST:            
@@ -593,7 +609,7 @@ if __name__ == "__main__":
     detObj = {}  
     frameData = {}    
     currentIndex = 0
-    client = connect_mqtt("LIVE RADAR") 
+    client = connect_mqtt(CLIENT_ID) 
     while True:
         try:
             # Update the data and check if the data is okay
@@ -609,15 +625,24 @@ if __name__ == "__main__":
 
         # Stop the program and close everything if Ctrl + c is pressed
         except KeyboardInterrupt:
+            print(f"CLIport status: {CLIport.is_open}")
+            print(f"Dataport status: {Dataport.is_open}")
+            print("Ctrl+C pressed...")
             CLIport.write(('sensorStop\n').encode())
             CLIport.close()
             Dataport.close()
             #win.close()
+            print("Live radar client terminated")
+            print(f"CLIport status: {CLIport.is_open}")
+            print(f"Dataport status: {Dataport.is_open}")
             break
         except Exception as e:
+            print("Something went wrong...")
             print(e)
             CLIport.write(('sensorStop\n').encode())
             CLIport.close()
             Dataport.close()
+            print(f"CLIport status: {CLIport.is_open}")
+            print(f"Dataport status: {Dataport.is_open}")
             #win.close()
             break
