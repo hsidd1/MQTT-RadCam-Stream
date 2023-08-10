@@ -8,7 +8,7 @@ with open("config.yaml", "r") as f:
 
 def main():
     #cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture(1) # external camera
+    cap = cv2.VideoCapture(1, cv2.CAP_DSHOW) # external camera
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, config["LiveData"]["camera"]["width"])
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config["LiveData"]["camera"]["height"])
     # cap.set(cv2.CAP_PROP_FPS, config["LiveData"]["camera"]["fps"])
