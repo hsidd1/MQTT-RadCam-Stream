@@ -14,3 +14,10 @@ CameraOutput:
   frame_skip: 1 # show every nth frame
   continuous_frame_mode: True # if True, will update display frames automatically, else waits for user key input
 write_log: False # write log file
+LiveData:
+  radar:
+    topic: "data/liveradar"
+    qos: 0
+    client_id: "LIVE RADAR"
+    CLIport: "COM3"
+    DataPort: "COM4"

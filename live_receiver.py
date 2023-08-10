@@ -1,38 +1,40 @@
 from processModule.serverConnect import connect_mqtt
-import cv2
+#import cv2
+#import os
+#import sys
 import yaml
-from processModule.camera_process import process_frames
+import subprocess
+#from processModule.camera_process import process_frames
+
 """
-Receiver client as subscriber of both device clients for logging received published data.
-Strictly runs receiver client only, so device clients can be run externally or separately.
+Receiver client for live radar and camera data. Requires radar to be connected. 
+Note: Runs subprocess for live radar client automatically. UART COM ports config
+must be set in config.yaml for Windows.
 """
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-cv2.namedWindow(f"Frame from {config['mqtt']['client_id2']}", cv2.WINDOW_NORMAL)
-SAMPLE_IMG = "data/sample_frame.png"
-data_array = cv2.imread(SAMPLE_IMG)
+RADAR_ID = config["LiveData"]["radar"]["client_id"]
+RADAR_TOPIC = config["LiveData"]["radar"]["topic"]
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
-        if msg.topic == "data/camera/frame":
+        if msg.topic == RADAR_TOPIC:
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
-            process_frames(msg.payload)
-        else:
-            print(f"Received {msg.payload.decode()} from topic {msg.topic}")
+
     client.subscribe(topic)
     client.on_message = on_message
 
 def main():
+    live_radar_process = subprocess.Popen(["python", "live_radarclient.py"])
     client = connect_mqtt("PC")
-    subscribe(client, topic = "data/radar")
-    subscribe(client, topic = "data/camera/frame")
-    subscribe(client, topic = "data/camera/ts")
+    subscribe(client, topic = RADAR_TOPIC)
 
     def exit_handler(client):
+        live_radar_process.kill()
+        print("Live radar process killed.") 
         client.disconnect()
-        cv2.destroyAllWindows()
     try:
         client.loop_forever()
     except KeyboardInterrupt:

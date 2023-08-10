@@ -5,7 +5,7 @@ import sys
 import datetime as dt
 import yaml
 import subprocess
-from processModule.cam_process import process_frames
+from processModule.camera_process import process_frames
 
 """
 Receiver client as subscriber of both device clients for logging and processing
