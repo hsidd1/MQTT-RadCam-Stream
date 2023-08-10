@@ -21,3 +21,7 @@ LiveData:
     client_id: "LIVE RADAR"
     CLIport: "COM3"
     DataPort: "COM4"
+  camera:
+    width: 480
+    height: 640
+    fps: 30
