@@ -4,7 +4,6 @@ import yaml
 import datetime as dt
 import traceback
 import time
-import numpy as np
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -38,7 +37,7 @@ def publish(client):
                 res = client.publish("data/livecamera", payload=payload, qos=0)
                 status = res[0]
                 if status == 0:
-                    print(f"Send {len(payload)} bytes to topic data/camera/frame")
+                    print(f"Send {len(payload)} bytes to topic data/livecamera")
                 #print(len(bytearray(str(dt.datetime.now().isoformat()), "utf-8"))) # 26 bytes
                 time.sleep(1)
             else:
