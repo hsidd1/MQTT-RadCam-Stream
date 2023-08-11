@@ -24,4 +24,4 @@ LiveData:
   camera:
     width: 480
     height: 640
-    fps: 30
+    fps: 10
