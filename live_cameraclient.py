@@ -33,7 +33,15 @@ def publish(client):
             ret, frame = cap.read()
             if ret:
                 payload = bytearray(frame)
+                timestamp = dt.datetime.now().isoformat()
+                #delimiter = bytearray(";", "utf-8")
+                # delimiter = b'|'
+                # ts_bytes = timestamp.encode("utf-8")
+                #ts_bytes = bytearray(timestamp, "utf-8")
+                # payload.extend(delimiter)
+                # payload.extend(ts_bytes)
                 #payload += bytearray(str(dt.datetime.now().isoformat()), "utf-8")
+                payload.extend(bytearray(str(dt.datetime.now().isoformat()), "utf-8"))
                 res = client.publish("data/livecamera", payload=payload, qos=0)
                 status = res[0]
                 if status == 0:
