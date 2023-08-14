@@ -24,16 +24,16 @@ def publish(client):
     global cap
 
     cap = cv2.VideoCapture(1, cv2.CAP_DSHOW) # external camera
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, config["LiveData"]["camera"]["width"])
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config["LiveData"]["camera"]["height"])
-    cap.set(cv2.CAP_PROP_FPS, config["LiveData"]["camera"]["fps"])
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, config["LiveData"]["camera"]["width"])
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config["LiveData"]["camera"]["height"])
+    # cap.set(cv2.CAP_PROP_FPS, config["LiveData"]["camera"]["fps"])
     client = connect_mqtt("Camera")
     while True:
         try:
             ret, frame = cap.read()
             if ret:
                 payload = bytearray(frame)
-                payload += bytearray(str(dt.datetime.now().isoformat()), "utf-8")
+                #payload += bytearray(str(dt.datetime.now().isoformat()), "utf-8")
                 res = client.publish("data/livecamera", payload=payload, qos=0)
                 status = res[0]
                 if status == 0:
