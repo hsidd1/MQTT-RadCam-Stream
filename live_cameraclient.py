@@ -32,21 +32,17 @@ def publish(client):
         try:
             ret, frame = cap.read()
             if ret:
+                """
+                Send frame and timestamp within same payload to topic data/livecamera
+                """
                 payload = bytearray(frame)
-                timestamp = dt.datetime.now().isoformat()
-                #delimiter = bytearray(";", "utf-8")
-                # delimiter = b'|'
-                # ts_bytes = timestamp.encode("utf-8")
-                #ts_bytes = bytearray(timestamp, "utf-8")
-                # payload.extend(delimiter)
-                # payload.extend(ts_bytes)
-                #payload += bytearray(str(dt.datetime.now().isoformat()), "utf-8")
+                # extend payload with timestamp: 26 bytes
                 payload.extend(bytearray(str(dt.datetime.now().isoformat()), "utf-8"))
+                #print(len(bytearray(str(dt.datetime.now().isoformat()), "utf-8"))) # 26 bytes
                 res = client.publish("data/livecamera", payload=payload, qos=0)
                 status = res[0]
                 if status == 0:
                     print(f"Send {len(payload)} bytes to topic data/livecamera")
-                #print(len(bytearray(str(dt.datetime.now().isoformat()), "utf-8"))) # 26 bytes
                 time.sleep(1)
             else:
                 print("No frame received.")

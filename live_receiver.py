@@ -1,10 +1,6 @@
 from processModule.serverConnect import connect_mqtt
-#import cv2
-#import os
-#import sys
 import yaml
 import subprocess
-#from processModule.camera_process import process_frames
 from processModule.camera_process import process_livecam
 """
 Receiver client for live radar and camera data. Requires radar to be connected. 
@@ -32,14 +28,14 @@ def subscribe(client, topic):
     client.on_message = on_message
 
 def main():
-    #live_radar_process = subprocess.Popen(["python", "live_radarclient.py"])
+    live_radar_process = subprocess.Popen(["python", "live_radarclient.py"])
     live_cam_process = subprocess.Popen(["python", "live_cameraclient.py"])
     client = connect_mqtt("PC")
     subscribe(client, topic = RADAR_TOPIC)
     subscribe(client, topic = CAMERA_TOPIC)
 
     def exit_handler(client):
-       # live_radar_process.kill()
+        live_radar_process.kill()
         print("Live radar process killed.") 
         live_cam_process.kill()
         print("Live camera process killed.")
