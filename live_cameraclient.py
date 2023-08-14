@@ -5,6 +5,11 @@ import datetime as dt
 import traceback
 import time
 
+"""
+Live client for camera device. Publishes frames and corresponding timestamps
+to topic data/livecamera.
+Note: This program runs as a subprocess of live_receiver.py.
+"""
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 cap = None

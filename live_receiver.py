@@ -4,8 +4,9 @@ import subprocess
 from processModule.camera_process import process_livecam
 """
 Receiver client for live radar and camera data. Requires radar to be connected. 
-Note: Runs subprocess for live radar client automatically. UART COM ports config
-must be set in config.yaml for Windows.
+This program receives and processes live radar and camera data from the device clients.
+Note: Runs subprocess for radar and camera automatically. UART COM ports config
+must be set in config.yaml for Windows. Requires external camera connection.
 """
 
 with open("config.yaml", "r") as f:

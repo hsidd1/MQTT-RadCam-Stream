@@ -4,9 +4,13 @@ import numpy as np
 #import matplotlib.pyplot as plt
 import struct
 import json
-#import pyqtgraph.opengl as gl
 from processModule.serverConnect import connect_mqtt
 import yaml 
+
+"""
+Live radar client program for publishing live radar data to MQTT broker.
+Note: This program runs as a subprocess of live_receiver.py.
+"""
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)

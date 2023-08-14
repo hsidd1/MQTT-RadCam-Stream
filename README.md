@@ -1,6 +1,6 @@
 # MQTT Radar-Camera Synchronization Stream
 
-A project that communicates video frame data and radar processed data from external device clients to a server for IoT system synchronization on the end user device (like a Raspberry Pi) using MQTT. Essentially, device clients can publish externally to the broker, and the receiver can process it frame by frame as data is published by subscribing to the respective topics, allowing timestamps to be synchronized as well as radar data coordinates being synchronized with their corresponding video frames for visualization, detection and analysis purposes. The end goal is to integrate this with a fare gate set up in our laboratory to track evasions and other analytics.
+A project that communicates video frames and radar data from external device clients to a server for IoT system synchronization on the end user device (like a Raspberry Pi) using MQTT. Essentially, device clients can publish externally to the broker, and the receiver can process it frame by frame as data is published by subscribing to the respective topics, allowing timestamps to be synchronized as well as radar data coordinates being synchronized with their corresponding video frames for visualization, detection and analysis purposes. Frames are displayed in real time with radars detecting objects within that frame, which are then plotted on the frame for the user. This software is being used in a laboratory setting for visualizing traffic, detecting evasions and tracking analytics in a fare gate system, hence the camera and radar positioning relative to each other is specific for this setting. I've also added pre-recorded video footage and radar data that are processed frame by frame for demonstration and validation which can be found in this repository as well.
 
 ## Installation
 
@@ -52,6 +52,28 @@ net start mosquitto # run broker
 ```
 - Ensure config for `broker` is set to localhost: `"127.0.0.1"`
 
+## Live Data
+### Configuration
+Radar used is IWR6843 by TI. Make sure this is connected with and setup with the necessary drivers. The config file is included within the repository. 
+
+In [config.yaml](config.yaml) under `LiveData`, update `DataPort` and `CLIport` parameters matching device.
+
+Disconnect and reconnect radar after each session to avoid blank data transfer.
+
+Camera used is Logitech BRIO. Ensure external camera is connected to device.
+
+### Usage
+Run the live receiver for live data, which runs live camera and live radar as subprocesses:
+```bash
+python live_receiver.py
+```
+These individual clients can be run individually as well:
+```bash
+# Optional
+python live_cameraclient.py
+python live_radarclient.py
+```
+## Pre-Processed Data 
 ### Publishing, Receiving and Processing 
 
 Execute main receiver to automatically subscribe to topics and run client programs as subprocesses in parallel
