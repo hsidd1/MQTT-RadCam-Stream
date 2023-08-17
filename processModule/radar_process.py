@@ -42,6 +42,7 @@ def readbuffer_process(readBuffer: bytearray, sensor_id) -> json:
     magicWord = [2, 1, 4, 3, 6, 5, 8, 7]
     MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020
     MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST = 1010
+    byteBufferLength = 0
     byteVec = np.frombuffer(readBuffer, dtype = 'uint8')
     byteCount = len(byteVec)
     print('byteCount is:  '+str(byteCount))
