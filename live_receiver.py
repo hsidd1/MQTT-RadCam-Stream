@@ -1,7 +1,9 @@
 from processModule.serverConnect import connect_mqtt
+from threading import Thread
 import yaml
 import subprocess
 from processModule.camera_process import process_livecam
+from processModule.save_data import save_data
 """
 Receiver client for live radar and camera data. Requires radar to be connected. 
 This program receives and processes live radar and camera data from the device clients.
@@ -20,7 +22,10 @@ CAMERA_TOPIC = "data/livecamera"
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
+        t = Thread(target=save_data, args=(msg.topic, msg.payload))
+        t.start()
         if msg.topic == RADAR_TOPIC:
+            #process_radar(msg.payload)
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
         if msg.topic == CAMERA_TOPIC:
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
@@ -41,6 +46,8 @@ def main():
         live_cam_process.kill()
         print("Live camera process killed.")
         client.disconnect()
+        with open("liveDataLog/radcam_log.json", "a") as f:
+            f.write("]")
     try:
         client.loop_forever()
     except KeyboardInterrupt:
