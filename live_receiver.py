@@ -26,9 +26,9 @@ def subscribe(client, topic):
         t.start()
         if msg.topic == RADAR_TOPIC:
             #process_radar(msg.payload)
-            print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
+            print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
         if msg.topic == CAMERA_TOPIC:
-            print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
+            print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
             process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
     client.subscribe(topic)
     client.on_message = on_message
@@ -51,10 +51,10 @@ def main():
     try:
         client.loop_forever()
     except KeyboardInterrupt:
-        print("Process Terminated. Exiting Receiver...")
+        print("RECEIVER: Process Terminated. Exiting Receiver...")
         exit_handler(client)
     except Exception as e:
-        print("Something went wrong. Exiting Receiver...")
+        print("RECEIVER: Something went wrong. Exiting Receiver...")
         print(e)
         exit_handler(client)
 

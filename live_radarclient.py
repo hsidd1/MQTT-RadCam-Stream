@@ -61,7 +61,7 @@ def serialConfig(configFileName):
     config = [line.rstrip('\r\n') for line in open(configFileName)]
     for i in config:
         CLIport.write((i+'\n').encode())
-        print(i)
+        #print(i)
         time.sleep(0.01)
         
     return CLIport, Dataport
@@ -233,10 +233,6 @@ def readAndParseData14xx(Dataport, configParameters, client):
     detObj = {}
     detObj_log  = None
     readBuffer = Dataport.read(Dataport.in_waiting)
-    print(type(readBuffer))
-    # msg = bytearray(readBuffer)
-    # print(type(msg))
-    #print(readBuffer)
     print('----------------------------------------------------------------------------------------------')
     '''
     with open('data_serial_log.txt', 'a') as file:
@@ -244,7 +240,7 @@ def readAndParseData14xx(Dataport, configParameters, client):
     '''
     byteVec = np.frombuffer(readBuffer, dtype = 'uint8')
     byteCount = len(byteVec)
-    print('byteCount is:  '+str(byteCount))
+    #print('byteCount is:  '+str(byteCount))
     
     # Check that the buffer is not full, and then add the data to the buffer
     if (byteBufferLength + byteCount) < maxBufferSize:
@@ -297,31 +293,31 @@ def readAndParseData14xx(Dataport, configParameters, client):
         
         # Read the header
         magicNumber = byteBuffer[idX:idX+8]
-        print('magicNumber: '+str(magicNumber))
+        #print('magicNumber: '+str(magicNumber))
         idX += 8
         version = format(np.matmul(byteBuffer[idX:idX+4],word),'x')
-        print('version '+str(version))
+        #print('version '+str(version))
         idX += 4
         totalPacketLen = np.matmul(byteBuffer[idX:idX+4],word)
-        print('totalPacketLen '+str(totalPacketLen))
+        #print('totalPacketLen '+str(totalPacketLen))
         idX += 4
         platform = format(np.matmul(byteBuffer[idX:idX+4],word),'x')
-        print('platform '+str(platform))
+        #print('platform '+str(platform))
         idX += 4
         frameNumber = np.matmul(byteBuffer[idX:idX+4],word)
-        print('frameNumber '+str(frameNumber))
+        #print('frameNumber '+str(frameNumber))
         idX += 4
         timeCpuCycles = np.matmul(byteBuffer[idX:idX+4],word)
-        print('timeCpuCycles '+str(timeCpuCycles))
+        #print('timeCpuCycles '+str(timeCpuCycles))
         idX += 4
         numDetectedObj = np.matmul(byteBuffer[idX:idX+4],word)
-        print('numDetectedObj '+str(numDetectedObj))
+        #print('numDetectedObj '+str(numDetectedObj))
         idX += 4
         numTLVs = np.matmul(byteBuffer[idX:idX+4],word)
-        print('numTLVs '+str(numTLVs))
+        #print('numTLVs '+str(numTLVs))
         idX += 4
         subFrameNumber = np.matmul(byteBuffer[idX:idX+4],word)
-        print('subFrameNumber '+str(subFrameNumber))
+        #print('subFrameNumber '+str(subFrameNumber))
         idX += 4
         #print(f"magicNumber = {magicNumber} \t version = {version} \t totalPacketLen = {totalPacketLen} \t platform = {platform} \t frameNumber = {frameNumber} ")
         #print(f"timeCpuCycles = {timeCpuCycles} \t\t numDetectedObj = {numDetectedObj} \t numTLVs = {numTLVs} \t\t idX = {idX}")
@@ -342,10 +338,10 @@ def readAndParseData14xx(Dataport, configParameters, client):
             
             #tlv_type = np.matmul(byteBuffer[idX:idX+4],word)
             idX += 4
-            print('tlv_type is: '+str(tlv_type))
+            #print('tlv_type is: '+str(tlv_type))
             #tlv_length = np.matmul(byteBuffer[idX:idX+4],word)
             idX += 4
-            print('tlv_length is: '+str(tlv_length))
+            #print('tlv_length is: '+str(tlv_length))
             #print(f"tlv_type = {tlv_type} \t MMWDEMO_UART_MSG_DETECTED_POINTS = {MMWDEMO_UART_MSG_DETECTED_POINTS}")
             # Read the data depending on the TLV message
             
@@ -504,7 +500,7 @@ def readAndParseData14xx(Dataport, configParameters, client):
         status = res[0]
         if status == 0:
             msg_str = str(detObj_log)[:10] + "..."
-            print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n")
+            print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n\n")
         else:
             print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
     return dataOK, frameNumber, detObj
@@ -521,9 +517,9 @@ def update(client):
       
     # Read and parse the received data
     dataOk, frameNumber, detObj = readAndParseData14xx(Dataport, configParameters, client)
-    print(f"dataOK = {dataOk}")
-    if dataOk and len(detObj["x"]) > 0:
-        print(detObj)
+    #print(f"dataOK = {dataOk}")
+    #if dataOk and len(detObj["x"]) > 0:
+        #print(detObj)
         #update_demo(detObj)
     
     return dataOk
@@ -632,19 +628,16 @@ if __name__ == "__main__":
 
         # Stop the program and close everything if Ctrl + c is pressed
         except KeyboardInterrupt:
-            print(f"CLIport status: {CLIport.is_open}")
-            print(f"Dataport status: {Dataport.is_open}")
-            print("Ctrl+C pressed...")
+            print("LIVE RADAR: Process Terminated...")
             CLIport.write(('sensorStop\n').encode())
             CLIport.close()
             Dataport.close()
             #win.close()
-            print("Live radar client terminated")
             print(f"CLIport status: {CLIport.is_open}")
             print(f"Dataport status: {Dataport.is_open}")
             break
         except Exception as e:
-            print("live_radarclient: Something went wrong...")
+            print("LIVE RADAR: Something went wrong...")
             #print(e)
             print(traceback.format_exc())
             CLIport.write(('sensorStop\n').encode())
