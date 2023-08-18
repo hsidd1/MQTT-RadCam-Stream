@@ -40,6 +40,7 @@ def readbuffer_process(readBuffer: bytearray, sensor_id) -> json:
     byteBuffer = np.zeros(2**15,dtype = 'uint8')
     maxBufferSize = 2**15
     magicWord = [2, 1, 4, 3, 6, 5, 8, 7]
+    magicOK = 0
     MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020
     MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST = 1010
     byteBufferLength = 0

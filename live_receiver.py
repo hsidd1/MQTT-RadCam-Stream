@@ -46,6 +46,8 @@ def main():
         live_cam_process.kill()
         print("Live camera process killed.")
         client.disconnect()
+        with open("liveDataLog/radcam_log.json", "a") as f:
+            f.write("]")
     try:
         client.loop_forever()
     except KeyboardInterrupt:
