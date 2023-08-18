@@ -6,6 +6,7 @@ import struct
 import json
 from processModule.serverConnect import connect_mqtt
 import yaml 
+import traceback
 
 """
 Live radar client program for publishing live radar data to MQTT broker.
@@ -186,7 +187,7 @@ def tlvHeaderDecode(data):
     return tlvType, tlvLength
 
 
-def readAndParseData14xx(Dataport, configParameters):
+def readAndParseData14xx(Dataport, configParameters, client):
     global byteBuffer, byteBufferLength
     
     # Constants
@@ -230,18 +231,11 @@ def readAndParseData14xx(Dataport, configParameters):
     dataOK = 0 # Checks if the data has been read correctly
     frameNumber = 0
     detObj = {}
-    
+    detObj_log  = None
     readBuffer = Dataport.read(Dataport.in_waiting)
     print(type(readBuffer))
-    msg = bytearray(readBuffer)
-    print(type(msg))
-    res = client.publish(topic=TOPIC, payload=str(msg), qos=0)
-    status = res[0]
-    if status == 0:
-        msg_str = readBuffer[:10]
-        print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n")
-    else:
-        print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
+    # msg = bytearray(readBuffer)
+    # print(type(msg))
     #print(readBuffer)
     print('----------------------------------------------------------------------------------------------')
     '''
@@ -502,14 +496,23 @@ def readAndParseData14xx(Dataport, configParameters):
             # Check that there are no errors with the buffer length
             if byteBufferLength < 0:
                 byteBufferLength = 0
-                
-
+        print(detObj_log)    
+        if detObj_log is not None:
+            res = client.publish(topic=TOPIC, payload=(detObj_log), qos=0)
+        else:
+            res = client.publish(topic=TOPIC, payload="Empty", qos=0)
+        status = res[0]
+        if status == 0:
+            msg_str = str(detObj_log)[:10] + "..."
+            print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n")
+        else:
+            print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
     return dataOK, frameNumber, detObj
 
 # ------------------------------------------------------------------
 
 # Funtion to update the data and display in the plot
-def update():
+def update(client):
      
     dataOk = 0
     global detObj
@@ -517,7 +520,7 @@ def update():
     y = []
       
     # Read and parse the received data
-    dataOk, frameNumber, detObj = readAndParseData14xx(Dataport, configParameters)
+    dataOk, frameNumber, detObj = readAndParseData14xx(Dataport, configParameters, client)
     print(f"dataOK = {dataOk}")
     if dataOk and len(detObj["x"]) > 0:
         print(detObj)
@@ -618,7 +621,7 @@ if __name__ == "__main__":
         try:
             # Update the data and check if the data is okay
             client.loop_start()
-            dataOk = update()
+            dataOk = update(client)
             if dataOk:
                 # Store the current frame into frameData
                 frameData[currentIndex] = detObj
@@ -641,8 +644,9 @@ if __name__ == "__main__":
             print(f"Dataport status: {Dataport.is_open}")
             break
         except Exception as e:
-            print("Something went wrong...")
-            print(e)
+            print("live_radarclient: Something went wrong...")
+            #print(e)
+            print(traceback.format_exc())
             CLIport.write(('sensorStop\n').encode())
             CLIport.close()
             Dataport.close()
