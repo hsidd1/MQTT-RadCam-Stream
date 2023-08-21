@@ -14,11 +14,11 @@ Note: This program runs as a subprocess of live_receiver.py.
 """
 
 with open("config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+    yml_config = yaml.safe_load(f)
 
 # MQTT identifiers
-TOPIC = config["LiveData"]["radar"]["topic"]
-CLIENT_ID = config["LiveData"]["radar"]["client_id"]
+TOPIC = yml_config["LiveData"]["radar"]["topic"]
+CLIENT_ID = yml_config["LiveData"]["radar"]["client_id"]
 # Change the configuration file name
 #configFileName = 'xwr68xxconfig.cfg'
 configFileName = 'ODS_6m_default.cfg'
@@ -28,8 +28,10 @@ configFileName = 'ODS_6m_default.cfg'
 write_radar = False
 CLIport = {}
 Dataport = {}
+CLIport2 = {}
+Dataport2 = {}
 byteBuffer = np.zeros(2**15,dtype = 'uint8')
-byteBufferLength = 0;
+byteBufferLength = 0
 
 #-------------------------------------------------------------------
 # Function to configure the serial ports and send the data from
@@ -38,7 +40,7 @@ def serialConfig(configFileName):
     
     global CLIport
     global Dataport
-    global config
+    global yml_config
     # Open the serial ports for the configuration and the data ports
     
     # Raspberry pi
@@ -46,8 +48,8 @@ def serialConfig(configFileName):
     #Dataport = serial.Serial('/dev/ttyACM1', 921600)
     
     # Windows
-    str_cliport = config["LiveData"]["radar"]["CLIport"]
-    str_dataport = config["LiveData"]["radar"]["DataPort"]
+    str_cliport = yml_config["LiveData"]["radar"]["CLIport"]
+    str_dataport = yml_config["LiveData"]["radar"]["DataPort"]
     CLIport = serial.Serial(str_cliport, 115200)
     Dataport = serial.Serial(str_dataport, 921600)
     # on reconnect, wait for the port to come back
@@ -65,6 +67,38 @@ def serialConfig(configFileName):
         time.sleep(0.01)
         
     return CLIport, Dataport
+
+def serialConfig2(configFileName):
+    
+    global CLIport2
+    global Dataport2
+    global yml_config
+    # Open the serial ports for the configuration and the data ports
+    
+    # Raspberry pi
+    #CLIport = serial.Serial('/dev/ttyACM0', 115200)
+    #Dataport = serial.Serial('/dev/ttyACM1', 921600)
+    
+    # Windows
+    str_cliport2 = yml_config["LiveData"]["radar"]["CLIport2"]
+    str_dataport2 = yml_config["LiveData"]["radar"]["DataPort2"]
+    CLIport2 = serial.Serial(str_cliport2, 115200)
+    Dataport2 = serial.Serial(str_dataport2, 921600)
+    # on reconnect, wait for the port to come back
+    time.sleep(1)
+    # flush buffers
+    CLIport2.flushInput()
+    CLIport2.flushOutput()
+    Dataport2.flushInput()
+    Dataport2.flushOutput()
+    # Read the configuration file and send it to the board
+    config = [line.rstrip('\r\n') for line in open(configFileName)]
+    for i in config:
+        CLIport2.write((i+'\n').encode())
+        #print(i)
+        time.sleep(0.01)
+        
+    return CLIport2, Dataport2
 
 # ------------------------------------------------------------------
 
@@ -90,21 +124,21 @@ def parseConfigFile(configFileName):
             rampEndTime = float(splitWords[5])
             freqSlopeConst = float(splitWords[8])
             numAdcSamples = int(splitWords[10])
-            numAdcSamplesRoundTo2 = 1;
+            numAdcSamplesRoundTo2 = 1
             
             while numAdcSamples > numAdcSamplesRoundTo2:
-                numAdcSamplesRoundTo2 = numAdcSamplesRoundTo2 * 2;
+                numAdcSamplesRoundTo2 = numAdcSamplesRoundTo2 * 2
                 
-            digOutSampleRate = int(splitWords[11]);
+            digOutSampleRate = int(splitWords[11])
             
         # Get the information about the frame configuration    
         elif "frameCfg" in splitWords[0]:
             
-            chirpStartIdx = int(splitWords[1]);
-            chirpEndIdx = int(splitWords[2]);
-            numLoops = int(splitWords[3]);
-            numFrames = int(splitWords[4]);
-            framePeriodicity = int(splitWords[5]);
+            chirpStartIdx = int(splitWords[1])
+            chirpEndIdx = int(splitWords[2])
+            numLoops = int(splitWords[3])
+            numFrames = int(splitWords[4])
+            framePeriodicity = int(splitWords[5])
 
             
     # Combine the read data to obtain the configuration parameters           
@@ -191,39 +225,39 @@ def readAndParseData14xx(Dataport, configParameters, client):
     global byteBuffer, byteBufferLength
     
     # Constants
-    OBJ_STRUCT_SIZE_BYTES = 12;
-    BYTE_VEC_ACC_MAX_SIZE = 2**15;
-    MMWDEMO_UART_MSG_DETECTED_POINTS = 1;
-    MMWDEMO_UART_MSG_RANGE_PROFILE   = 2;
+    OBJ_STRUCT_SIZE_BYTES = 12
+    BYTE_VEC_ACC_MAX_SIZE = 2**15
+    MMWDEMO_UART_MSG_DETECTED_POINTS = 1
+    MMWDEMO_UART_MSG_RANGE_PROFILE   = 2
     
     
     
     ####################################TLV types:###############################
-    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS = 1;
-    MMWDEMO_OUTPUT_MSG_RANGE_PROFILE = 2;
-    MMWDEMO_OUTPUT_MSG_NOISE_PROFILE = 3;
-    MMWDEMO_OUTPUT_MSG_AZIMUT_STATIC_HEAT_MAP = 4;
-    MMWDEMO_OUTPUT_MSG_RANGE_DOPPLER_HEAT_MAP = 5;
-    MMWDEMO_OUTPUT_MSG_STATS = 6;
-    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS_SIDE_INFO = 7;
-    MMWDEMO_OUTPUT_MSG_AZIMUT_ELEVATION_STATIC_HEAT_MAP = 8;
-    MMWDEMO_OUTPUT_MSG_TEMPERATURE_STATS = 9;
+    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS = 1
+    MMWDEMO_OUTPUT_MSG_RANGE_PROFILE = 2
+    MMWDEMO_OUTPUT_MSG_NOISE_PROFILE = 3
+    MMWDEMO_OUTPUT_MSG_AZIMUT_STATIC_HEAT_MAP = 4
+    MMWDEMO_OUTPUT_MSG_RANGE_DOPPLER_HEAT_MAP = 5
+    MMWDEMO_OUTPUT_MSG_STATS = 6
+    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS_SIDE_INFO = 7
+    MMWDEMO_OUTPUT_MSG_AZIMUT_ELEVATION_STATIC_HEAT_MAP = 8
+    MMWDEMO_OUTPUT_MSG_TEMPERATURE_STATS = 9
     
-    MMWDEMO_OUTPUT_MSG_SPHERICAL_POINTS = 1000;
-    MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST = 1010;
-    MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_INDEX = 1011;
+    MMWDEMO_OUTPUT_MSG_SPHERICAL_POINTS = 1000
+    MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST = 1010
+    MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_INDEX = 1011
     MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_HEIGHT = 1012
-    MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020;
-    MMWDEMO_OUTPUT_MSG_PRESCENCE_INDICATION = 1021;
-    MMWDEMO_OUTPUT_MSG_OCCUPANCY_STATE_MACHINE = 1030;
+    MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020
+    MMWDEMO_OUTPUT_MSG_PRESCENCE_INDICATION = 1021
+    MMWDEMO_OUTPUT_MSG_OCCUPANCY_STATE_MACHINE = 1030
     
-    MMWDEMO_OUTPUT_MSG_VITALSIGNS = 1040;
-    
-    
+    MMWDEMO_OUTPUT_MSG_VITALSIGNS = 1040
     
     
     
-    maxBufferSize = 2**15;
+    
+    
+    maxBufferSize = 2**15
     magicWord = [2, 1, 4, 3, 6, 5, 8, 7]
     
     # Initialize variables
