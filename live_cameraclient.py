@@ -52,7 +52,7 @@ def publish(client):
             else:
                 print("No frame received.")
         except KeyboardInterrupt:
-            print("Process Terminated. Exiting Camera...")
+            print("LIVE CAMERA: Process Terminated. Exiting Camera...")
             break
 
 def main():
@@ -62,12 +62,12 @@ def main():
         publish(client)
         client.loop_stop()
     except KeyboardInterrupt:
-        print("Process Terminated. Exiting Camera...")
+        print("LIVE CAMERA: Process Terminated. Exiting Camera...")
         cap.release()
         cv2.destroyAllWindows()
         client.disconnect()
     except Exception as e:
-        print("Error Occured. Exiting Camera...")
+        print("LIVE CAMERA: Error Occured. Exiting Camera...")
         cap.release()
         cv2.destroyAllWindows()
         client.disconnect()

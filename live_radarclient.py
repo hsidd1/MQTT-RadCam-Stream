@@ -10,6 +10,7 @@ import traceback
 from datetime import datetime
 import time
 
+
 """
 Live radar client program for publishing live radar data to MQTT broker.
 Note: This program runs as a subprocess of live_receiver.py.
@@ -227,39 +228,39 @@ def readAndParseData(Dataport, configParameters, sensor_id):
     global byteBuffer, byteBufferLength
     
     # Constants
-    OBJ_STRUCT_SIZE_BYTES = 12;
-    BYTE_VEC_ACC_MAX_SIZE = 2**15;
-    MMWDEMO_UART_MSG_DETECTED_POINTS = 1;
-    MMWDEMO_UART_MSG_RANGE_PROFILE   = 2;
+    OBJ_STRUCT_SIZE_BYTES = 12
+    BYTE_VEC_ACC_MAX_SIZE = 2**15
+    MMWDEMO_UART_MSG_DETECTED_POINTS = 1
+    MMWDEMO_UART_MSG_RANGE_PROFILE   = 2
     
     
     
     ####################################TLV types:###############################
-    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS = 1;
-    MMWDEMO_OUTPUT_MSG_RANGE_PROFILE = 2;
-    MMWDEMO_OUTPUT_MSG_NOISE_PROFILE = 3;
-    MMWDEMO_OUTPUT_MSG_AZIMUT_STATIC_HEAT_MAP = 4;
-    MMWDEMO_OUTPUT_MSG_RANGE_DOPPLER_HEAT_MAP = 5;
-    MMWDEMO_OUTPUT_MSG_STATS = 6;
-    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS_SIDE_INFO = 7;
-    MMWDEMO_OUTPUT_MSG_AZIMUT_ELEVATION_STATIC_HEAT_MAP = 8;
-    MMWDEMO_OUTPUT_MSG_TEMPERATURE_STATS = 9;
+    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS = 1
+    MMWDEMO_OUTPUT_MSG_RANGE_PROFILE = 2
+    MMWDEMO_OUTPUT_MSG_NOISE_PROFILE = 3
+    MMWDEMO_OUTPUT_MSG_AZIMUT_STATIC_HEAT_MAP = 4
+    MMWDEMO_OUTPUT_MSG_RANGE_DOPPLER_HEAT_MAP = 5
+    MMWDEMO_OUTPUT_MSG_STATS = 6
+    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS_SIDE_INFO = 7
+    MMWDEMO_OUTPUT_MSG_AZIMUT_ELEVATION_STATIC_HEAT_MAP = 8
+    MMWDEMO_OUTPUT_MSG_TEMPERATURE_STATS = 9
     
-    MMWDEMO_OUTPUT_MSG_SPHERICAL_POINTS = 1000;
-    MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST = 1010;
-    MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_INDEX = 1011;
+    MMWDEMO_OUTPUT_MSG_SPHERICAL_POINTS = 1000
+    MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST = 1010
+    MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_INDEX = 1011
     MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_HEIGHT = 1012
-    MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020;
-    MMWDEMO_OUTPUT_MSG_PRESCENCE_INDICATION = 1021;
-    MMWDEMO_OUTPUT_MSG_OCCUPANCY_STATE_MACHINE = 1030;
+    MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020
+    MMWDEMO_OUTPUT_MSG_PRESCENCE_INDICATION = 1021
+    MMWDEMO_OUTPUT_MSG_OCCUPANCY_STATE_MACHINE = 1030
     
-    MMWDEMO_OUTPUT_MSG_VITALSIGNS = 1040;
-    
-    
+    MMWDEMO_OUTPUT_MSG_VITALSIGNS = 1040
     
     
     
-    maxBufferSize = 2**15;
+    
+    
+    maxBufferSize = 2**15
     magicWord = [2, 1, 4, 3, 6, 5, 8, 7]
     
     # Initialize variables
@@ -267,7 +268,7 @@ def readAndParseData(Dataport, configParameters, sensor_id):
     dataOK = 0 # Checks if the data has been read correctly
     frameNumber = 0
     detObj = {}
-    
+    detObj_log  = None
     readBuffer = Dataport.read(Dataport.in_waiting)
     #print(readBuffer)
     print('----------------------------------------------------------------------------------------------')
@@ -277,7 +278,7 @@ def readAndParseData(Dataport, configParameters, sensor_id):
     '''
     byteVec = np.frombuffer(readBuffer, dtype = 'uint8')
     byteCount = len(byteVec)
-    print('byteCount is:  '+str(byteCount))
+    #print('byteCount is:  '+str(byteCount))
     
     # Check that the buffer is not full, and then add the data to the buffer
     if (byteBufferLength + byteCount) < maxBufferSize:
@@ -330,31 +331,31 @@ def readAndParseData(Dataport, configParameters, sensor_id):
         
         # Read the header
         magicNumber = byteBuffer[idX:idX+8]
-        print('magicNumber: '+str(magicNumber))
+        #print('magicNumber: '+str(magicNumber))
         idX += 8
         version = format(np.matmul(byteBuffer[idX:idX+4],word),'x')
-        print('version '+str(version))
+        #print('version '+str(version))
         idX += 4
         totalPacketLen = np.matmul(byteBuffer[idX:idX+4],word)
-        print('totalPacketLen '+str(totalPacketLen))
+        #print('totalPacketLen '+str(totalPacketLen))
         idX += 4
         platform = format(np.matmul(byteBuffer[idX:idX+4],word),'x')
-        print('platform '+str(platform))
+        #print('platform '+str(platform))
         idX += 4
         frameNumber = np.matmul(byteBuffer[idX:idX+4],word)
-        print('frameNumber '+str(frameNumber))
+        #print('frameNumber '+str(frameNumber))
         idX += 4
         timeCpuCycles = np.matmul(byteBuffer[idX:idX+4],word)
-        print('timeCpuCycles '+str(timeCpuCycles))
+        #print('timeCpuCycles '+str(timeCpuCycles))
         idX += 4
         numDetectedObj = np.matmul(byteBuffer[idX:idX+4],word)
-        print('numDetectedObj '+str(numDetectedObj))
+        #print('numDetectedObj '+str(numDetectedObj))
         idX += 4
         numTLVs = np.matmul(byteBuffer[idX:idX+4],word)
-        print('numTLVs '+str(numTLVs))
+        #print('numTLVs '+str(numTLVs))
         idX += 4
         subFrameNumber = np.matmul(byteBuffer[idX:idX+4],word)
-        print('subFrameNumber '+str(subFrameNumber))
+        #print('subFrameNumber '+str(subFrameNumber))
         idX += 4
         #print(f"magicNumber = {magicNumber} \t version = {version} \t totalPacketLen = {totalPacketLen} \t platform = {platform} \t frameNumber = {frameNumber} ")
         #print(f"timeCpuCycles = {timeCpuCycles} \t\t numDetectedObj = {numDetectedObj} \t numTLVs = {numTLVs} \t\t idX = {idX}")
@@ -375,10 +376,10 @@ def readAndParseData(Dataport, configParameters, sensor_id):
             
             #tlv_type = np.matmul(byteBuffer[idX:idX+4],word)
             idX += 4
-            print('tlv_type is: '+str(tlv_type))
+            #print('tlv_type is: '+str(tlv_type))
             #tlv_length = np.matmul(byteBuffer[idX:idX+4],word)
             idX += 4
-            print('tlv_length is: '+str(tlv_length))
+            #print('tlv_length is: '+str(tlv_length))
             #print(f"tlv_type = {tlv_type} \t MMWDEMO_UART_MSG_DETECTED_POINTS = {MMWDEMO_UART_MSG_DETECTED_POINTS}")
             # Read the data depending on the TLV message
             
@@ -530,8 +531,17 @@ def readAndParseData(Dataport, configParameters, sensor_id):
             # Check that there are no errors with the buffer length
             if byteBufferLength < 0:
                 byteBufferLength = 0
-                
-
+        print(detObj_log)    
+        if detObj_log is not None:
+            res = client.publish(topic=TOPIC, payload=(detObj_log), qos=0)
+        else:
+            res = client.publish(topic=TOPIC, payload="Empty", qos=0)
+        status = res[0]
+        if status == 0:
+            msg_str = str(detObj_log)[:10] + "..."
+            print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n\n")
+        else:
+            print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
     return dataOK, frameNumber, detObj
 
 
@@ -960,6 +970,13 @@ if __name__ == "__main__":
             # Update the data and check if the data is okay
             client.loop_start()
             dataOk1, dataOk2 = update(client)
+
+#             dataOk = update(client)
+#             if dataOk:
+#                 # Store the current frame into frameData
+#                 frameData[currentIndex] = detObj
+#                 currentIndex += 1
+
             
             time.sleep(0.06) # Sampling frequency of 30 Hz
             client.loop_stop()

@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import json 
 import datetime as dt
-from processModule.radar_process import readbuffer_process
+#from processModule.radar_process import readbuffer_process
 
 """
 run as thread, writes live payload data: ./liveDataLog:
@@ -19,7 +19,7 @@ data_array = cv2.imread(SAMPLE_IMG)
 CAMERA_TOPIC = "data/livecamera"
 RADAR_TOPIC = "data/liveradar"
 
-def save_data(topic: str, payload: bytearray) -> None:
+def save_data(topic: str, payload) -> None:
     if not hasattr(save_data, "frame_id"):
         save_data.frame_id = 0
     cam_object = radar_object = None
@@ -41,7 +41,15 @@ def save_data(topic: str, payload: bytearray) -> None:
             "frame_id": save_data.frame_id
         }
     if topic == RADAR_TOPIC:
-        radar_object = readbuffer_process(payload, "s1")
+        radar_object1 = {
+            "topic": topic,
+            "sub_ts": sub_ts,
+        }
+        try:
+            radar_object2 = {"radar_payload": json.loads(payload.decode("utf-8"))}
+        except json.JSONDecodeError:
+            radar_object2 = {"radar_payload": payload.decode("utf-8")}
+        radar_object = {**radar_object1, **radar_object2}
     
     with open(RADCAM_PATH, "a") as f:
         if f.tell() == 0:
