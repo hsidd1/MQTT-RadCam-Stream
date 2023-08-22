@@ -7,7 +7,7 @@ import json
 from processModule.serverConnect import connect_mqtt
 import yaml 
 import traceback
-
+from datetime import datetime
 """
 Live radar client program for publishing live radar data to MQTT broker.
 Note: This program runs as a subprocess of live_receiver.py.
@@ -36,7 +36,7 @@ byteBufferLength = 0
 #-------------------------------------------------------------------
 # Function to configure the serial ports and send the data from
 # the configuration file to the radar
-def serialConfig(configFileName):
+def serialConfig1(configFileName):
     
     global CLIport
     global Dataport
@@ -221,7 +221,7 @@ def tlvHeaderDecode(data):
     return tlvType, tlvLength
 
 
-def readAndParseData14xx(Dataport, configParameters, client):
+def readAndParseData(Dataport, configParameters, client, sensor_id):
     global byteBuffer, byteBufferLength
     
     # Constants
@@ -440,8 +440,8 @@ def readAndParseData14xx(Dataport, configParameters, client):
                 # Compute Z
                 # Range * sin (elevation)
                 pointCloud[:,2] = sphericalPointCloud[:,0] * np.sin(sphericalPointCloud[:,2])
-                detObj = {"TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
-                detObj_log = json.dumps({"TLV_type":int(tlv_type),"frame":int(frameNumber), "x": pointCloud[:,0].tolist(), "y": pointCloud[:,1].tolist(), "z": pointCloud[:,2].tolist()})
+                detObj = {"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id),"TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
+                detObj_log = json.dumps({"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id),"TLV_type":int(tlv_type),"frame":int(frameNumber), "x": pointCloud[:,0].tolist(), "y": pointCloud[:,1].tolist(), "z": pointCloud[:,2].tolist()})
                 if write_radar:
                     with open('data/tlv_data_log.json', 'a') as file:
                         file.write(str(detObj_log)+',\n')
@@ -479,8 +479,8 @@ def readAndParseData14xx(Dataport, configParameters, client):
                
                 
                 # Store the data in the detObj dictionary
-                detObj = {"TLV_type":tlv_type,"frame":frameNumber,"tid": targets[:,0], "x": targets[:,1], "y": targets[:,2], "z": targets[:,3]}
-                detObj_log = json.dumps({"TLV_type":int(tlv_type), "frame":int(frameNumber),"tid": targets[:,0].tolist(), "x": targets[:,1].tolist(), "y": targets[:,2].tolist(), "z": targets[:,3].tolist()})
+                detObj = {"Sensor_id": sensor_id, "TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
+                detObj_log = json.dumps({"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id), "TLV_type":int(tlv_type),"frame":int(frameNumber), "x": pointCloud[:,0].tolist(), "y": pointCloud[:,1].tolist(), "z": pointCloud[:,2].tolist()})
                 if write_radar:
                     with open('data/tlv_data_log.json', 'a') as file:
                         file.write(str(detObj_log)+',\n')
@@ -550,13 +550,14 @@ def update(client):
     y = []
       
     # Read and parse the received data
-    dataOk, frameNumber, detObj = readAndParseData14xx(Dataport, configParameters, client)
+    dataOk, frameNumber, detObj = readAndParseData(Dataport, configParameters, client, sensor_id=1)
+    dataOk2, frameNumber2, detObj2 = readAndParseData(Dataport2, configParameters, client, sensor_id=2)
     #print(f"dataOK = {dataOk}")
     #if dataOk and len(detObj["x"]) > 0:
         #print(detObj)
         #update_demo(detObj)
     
-    return dataOk
+    return dataOk, dataOk2
 
 #--------------------------    DEMO    ----------------------------------------
 # modify below to change number of frames to run in animation
@@ -623,7 +624,9 @@ def update_demo(det_obj):
 
 # Configurate the serial port
 
-CLIport, Dataport = serialConfig(configFileName)
+CLIport1, Dataport1 = serialConfig1(configFileName)
+time.sleep(0.1)
+CLIport2, Dataport2 = serialConfig2(configFileName)
 
 # Get the configuration parameters from the configuration file
 configParameters = parseConfigFile(configFileName)
@@ -644,20 +647,14 @@ Dataport.close()
 # Main loop 
 if __name__ == "__main__":
     detObj = {}  
-    frameData = {}    
-    currentIndex = 0
     client = connect_mqtt(CLIENT_ID) 
     while True:
         try:
             # Update the data and check if the data is okay
             client.loop_start()
-            dataOk = update(client)
-            if dataOk:
-                # Store the current frame into frameData
-                frameData[currentIndex] = detObj
-                currentIndex += 1
+            dataOk1, dataOk2 = update(client)
             
-            time.sleep(0.033) # Sampling frequency of 30 Hz
+            time.sleep(0.06) 
             client.loop_stop()
 
         # Stop the program and close everything if Ctrl + c is pressed
