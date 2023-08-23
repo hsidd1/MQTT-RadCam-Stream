@@ -1,7 +1,6 @@
 import serial
 import time
 import numpy as np
-#import matplotlib.pyplot as plt
 import struct
 import json
 from processModule.serverConnect import connect_mqtt
@@ -224,38 +223,12 @@ def tlvHeaderDecode(data):
 def readAndParseData(Dataport, configParameters, client, sensor_id):
     global byteBuffer, byteBufferLength
     
-    # Constants
-    OBJ_STRUCT_SIZE_BYTES = 12
-    BYTE_VEC_ACC_MAX_SIZE = 2**15
-    MMWDEMO_UART_MSG_DETECTED_POINTS = 1
-    MMWDEMO_UART_MSG_RANGE_PROFILE   = 2
-    
-    
-    
     ####################################TLV types:###############################
-    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS = 1
-    MMWDEMO_OUTPUT_MSG_RANGE_PROFILE = 2
-    MMWDEMO_OUTPUT_MSG_NOISE_PROFILE = 3
-    MMWDEMO_OUTPUT_MSG_AZIMUT_STATIC_HEAT_MAP = 4
-    MMWDEMO_OUTPUT_MSG_RANGE_DOPPLER_HEAT_MAP = 5
-    MMWDEMO_OUTPUT_MSG_STATS = 6
-    MMWDEMO_OUTPUT_MSG_DETECTED_POINTS_SIDE_INFO = 7
-    MMWDEMO_OUTPUT_MSG_AZIMUT_ELEVATION_STATIC_HEAT_MAP = 8
-    MMWDEMO_OUTPUT_MSG_TEMPERATURE_STATS = 9
     
-    MMWDEMO_OUTPUT_MSG_SPHERICAL_POINTS = 1000
     MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST = 1010
     MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_INDEX = 1011
     MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_HEIGHT = 1012
-    MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020
-    MMWDEMO_OUTPUT_MSG_PRESCENCE_INDICATION = 1021
-    MMWDEMO_OUTPUT_MSG_OCCUPANCY_STATE_MACHINE = 1030
-    
-    MMWDEMO_OUTPUT_MSG_VITALSIGNS = 1040
-    
-    
-    
-    
+    MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020    
     
     maxBufferSize = 2**15
     magicWord = [2, 1, 4, 3, 6, 5, 8, 7]
@@ -381,7 +354,7 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
             
             
             ##########################---Point Cloud TLV---############################
-            if tlv_type == MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS:
+            if tlv_type == MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS: # 1020
                 
                 
                 tlvData = byteBuffer[idX:idX+tlv_length]
@@ -447,7 +420,7 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
                         file.write(str(detObj_log)+',\n')
                 
             ##########################---Target List TLV---############################
-            elif tlv_type == MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST:            
+            elif tlv_type == MMWDEMO_OUTPUT_MSG_TRACKERPROC_3D_TARGET_LIST: # 1010           
 
                 targetStruct = 'I27f' 
                 targetSize = struct.calcsize(targetStruct)
@@ -479,8 +452,11 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
                
                 
                 # Store the data in the detObj dictionary
-                detObj = {"Sensor_id": sensor_id, "TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
-                detObj_log = json.dumps({"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id), "TLV_type":int(tlv_type),"frame":int(frameNumber), "x": pointCloud[:,0].tolist(), "y": pointCloud[:,1].tolist(), "z": pointCloud[:,2].tolist()})
+                #detObj = {"Sensor_id": sensor_id, "TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
+                try: 
+                    detObj_log = json.dumps({"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id), "TLV_type":int(tlv_type),"frame":int(frameNumber), "x": pointCloud[:,0].tolist(), "y": pointCloud[:,1].tolist(), "z": pointCloud[:,2].tolist()})
+                except UnboundLocalError:
+                    detObj_log = None
                 if write_radar:
                     with open('data/tlv_data_log.json', 'a') as file:
                         file.write(str(detObj_log)+',\n')
@@ -496,7 +472,7 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
                 dataOK = 0
         
             ##########################---Target List TLV---############################
-            elif tlv_type == MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_INDEX:
+            elif tlv_type == MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_INDEX: # 1011
                             
                 word = [1, 2**8, 2**16, 2**24]
                 tid = byteBuffer[idX]
@@ -529,16 +505,16 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
         print(detObj_log)    
         if detObj_log is not None:
             res = client.publish(topic=TOPIC, payload=(detObj_log), qos=0)
-        else:
-            res = client.publish(topic=TOPIC, payload="Empty", qos=0)
-        status = res[0]
-        if status == 0:
-            msg_str = str(detObj_log)[:10] + "..."
-            print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n\n")
-        else:
-            print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
+        # else:
+        #     res = client.publish(topic=TOPIC, payload="Empty", qos=0)
+            status = res[0]
+            if status == 0: 
+                # msg_str = str(detObj_log)[:10] + "..."
+                msg_str = "detObj_log"
+                print(f"{CLIENT_ID}: Send `{msg_str}` to topic `{TOPIC}`\n\n")
+            else:
+                print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
     return dataOK, frameNumber, detObj
-
 # ------------------------------------------------------------------
 
 # Funtion to update the data and display in the plot
@@ -559,67 +535,6 @@ def update(client):
     
     return dataOk, dataOk2
 
-#--------------------------    DEMO    ----------------------------------------
-# modify below to change number of frames to run in animation
-marker_size = 5
-
-
-
-'''
-def update_demo(det_obj):
-    # Create the figure and 3D subplot
-    #fig = plt.figure(figsize=(9, 6), dpi=100)
-    #ax = fig.add_subplot(111, projection='3d')
-
-    # For axis limits 
-    max_x= 14.5406686
-    max_y= 16.3837508
-    max_z= 15.0282616
-    min_x= -14.2102056
-    min_y= 0.0
-    min_z= -15.5174625
-    frame_data = det_obj
-    #ax.view_init(elev=i, azim=i)
-    x = frame_data['x']
-    y = frame_data['y']
-    z = frame_data['z']
-    tid = frame_data.get('tid', None)
-    ax.clear()
-    if frame_data['TLV_type'] == 1020:
-        point_colour = (0,0,0.5) 
-    elif frame_data['TLV_type'] == 1010:
-        point_colour = 'red'
-    else:
-        point_colour = 'green'
-    for j in range(len(x)):
-        #sc = ax.scatter(x[j], y[j], z[j], c=color, cmap='plasma', s=marker_size, alpha=0.5)
-        sc = ax.scatter(x[j], y[j], z[j], color=point_colour, s=marker_size, alpha=1)
-        
-    # ax.set_xlim3d(-15, 15)
-    # ax.set_ylim3d(0, 17)
-    # ax.set_zlim3d(-16, 16)
-    ax.set_xlim3d(round(min_x-1), round(max_x+1))
-    ax.set_ylim3d(round(min_y-1), round(max_y+1))
-    ax.set_zlim3d(round(min_z-1), round(max_z+1))
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.xaxis.set_pane_color((0.992, 0.965, 0.890, 1.0))  
-    ax.yaxis.set_pane_color((0.992, 0.965, 0.890, 1.0))  
-    ax.zaxis.set_pane_color((0.992, 0.965, 0.890, 1.0))  
-
-    ax.set_title("Radar Visualization (3D Scatter Plot)")
-    text_str = (
-    f'Points in frame: {len(x)} \n'
-    f'Frame: {frame_data["frame"]} \n'
-    f'TLV Type: {frame_data["TLV_type"]} \n'
-    f'tid: {tid if tid else "None"}'
-    )
-    ax.text(0.98, 0.02, 0.02, text_str, transform=ax.transAxes, fontsize=10, ha='right', va='bottom')
-    fig.canvas.draw()
-    fig.canvas.manager.show() 
-    fig.canvas.flush_events() 
-'''
 # -------------------------    MAIN   -----------------------------------------  
 
 # Configurate the serial port
@@ -631,14 +546,7 @@ CLIport2, Dataport2 = serialConfig2(configFileName)
 # Get the configuration parameters from the configuration file
 configParameters = parseConfigFile(configFileName)
 
-
-# START QtAPPfor the plot
-
 CLIport.write(('sensorStop\n').encode())
-'''
-CLIport.close()
-Dataport.close()
-'''
 
 #plt.axis([0, 10, 0, 1])
 #plt.show()
@@ -654,7 +562,7 @@ if __name__ == "__main__":
             client.loop_start()
             dataOk1, dataOk2 = update(client)
             
-            time.sleep(0.06) 
+            time.sleep(0.01) 
             client.loop_stop()
 
         # Stop the program and close everything if Ctrl + c is pressed
@@ -663,7 +571,6 @@ if __name__ == "__main__":
             CLIport.write(('sensorStop\n').encode())
             CLIport.close()
             Dataport.close()
-            #win.close()
             print(f"CLIport status: {CLIport.is_open}")
             print(f"Dataport status: {Dataport.is_open}")
             break
@@ -675,6 +582,5 @@ if __name__ == "__main__":
             CLIport.close()
             Dataport.close()
             print(f"CLIport status: {CLIport.is_open}")
-            print(f"Dataport status: {Dataport.is_open}")
-            #win.close()
+            print(f"Dataport status: {Dataport.is_open}")            
             break
