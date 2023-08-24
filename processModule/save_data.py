@@ -15,13 +15,13 @@ IMG_PATH = "./liveDataLog/camera_data/"
 RADCAM_PATH = "./liveDataLog/radcam_log.json"
 SAMPLE_IMG = "./data/sample_frame.png"
 data_array = cv2.imread(SAMPLE_IMG)
+# print(data_array.shape) # (480, 640, 3)
 CAMERA_TOPIC = "data/livecamera"
 RADAR_TOPIC = "data/liveradar"
 
 def save_data(topic: str, payload: Union[bytes, str]) -> Optional[dict]:
     """
     saves live camera frames and radar data to ./liveDataLog/camera_data and ./liveDataLog/radcam_log.json
-    returns radar_object, if received, as json for processing
     """
     # function attribute to keep track of frame_id
     if not hasattr(save_data, "frame_id"):
@@ -66,7 +66,6 @@ def save_data(topic: str, payload: Union[bytes, str]) -> Optional[dict]:
             json.dump(cam_object, f)
         if radar_object:
             json.dump(radar_object, f)
-    return radar_object
 
 """
 class CamPayload:

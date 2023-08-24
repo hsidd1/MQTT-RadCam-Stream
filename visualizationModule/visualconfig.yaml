@@ -1,0 +1,19 @@
+Files:
+  radar_data_file: ./data/Control_test1.json
+  video_file: ./data/Controlled_test.avi
+SensorAngles:
+  alpha: 47.5
+  beta: 17.5
+SensorOffsets:
+  offsetx: 325
+  offsety: 595
+  offsetz: 850
+TrackbarDefaults:
+  slider_xoffset: 0
+  slider_yoffset: 0
+  xy_trackbar_scale: 1
+rad_cam_offset: 0
+playback_fps: 27
+scalemm2px: 0.5
+wait_ms: 33
+remove_noise: True

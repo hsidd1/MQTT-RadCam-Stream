@@ -1,6 +1,7 @@
 from processModule.serverConnect import connect_mqtt
+from visualizationModule.visualization_main import run_visualization
 from threading import Thread
-import yaml
+import yaml, traceback
 import subprocess
 from processModule.camera_process import process_livecam
 from processModule.save_data import save_data
@@ -22,15 +23,22 @@ CAMERA_TOPIC = "data/livecamera"
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
-        # t = Thread(target=save_data, args=(msg.topic, msg.payload))
-        # t.start()
-        radar_object = save_data(msg.topic, msg.payload)
+        t = Thread(target=save_data, args=(msg.topic, msg.payload))
+        t.start()
+        cam_payload = radar_payload = None
         if msg.topic == RADAR_TOPIC:
             #process_radar(msg.payload)
+            radar_payload = msg.payload
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
         if msg.topic == CAMERA_TOPIC:
+            cam_payload = msg.payload
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
-            process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
+            # process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
+        try:
+            run_visualization(cam_payload, radar_payload)
+        # do nothing if payload is None
+        except TypeError:
+            pass
     client.subscribe(topic)
     client.on_message = on_message
 
@@ -56,7 +64,8 @@ def main():
         exit_handler(client)
     except Exception as e:
         print("RECEIVER: Something went wrong. Exiting Receiver...")
-        print(e)
+        #print(e)
+        print(traceback.format_exc())
         exit_handler(client)
 
 if __name__ == "__main__":
