@@ -547,11 +547,6 @@ CLIport2, Dataport2 = serialConfig2(configFileName)
 configParameters = parseConfigFile(configFileName)
 
 CLIport.write(('sensorStop\n').encode())
-
-#plt.axis([0, 10, 0, 1])
-#plt.show()
-    
-   
 # Main loop 
 if __name__ == "__main__":
     detObj = {}  

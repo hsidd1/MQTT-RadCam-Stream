@@ -1,8 +1,8 @@
+from typing import Union, Optional
 import cv2 
 import numpy as np
 import json 
 import datetime as dt
-#from processModule.radar_process import readbuffer_process
 
 """
 run as thread, writes live payload data: ./liveDataLog:
@@ -11,7 +11,6 @@ run as thread, writes live payload data: ./liveDataLog:
 camera: {topic, sub_ts, pub_ts (matching filename in ./camera_data), frame_id}
  radar: {topic, sub_ts, pub_ts, radar_json (sensor id, x, y, z, tlv, tid, frame)} 
 """
-
 IMG_PATH = "./liveDataLog/camera_data/"
 RADCAM_PATH = "./liveDataLog/radcam_log.json"
 SAMPLE_IMG = "./data/sample_frame.png"
@@ -19,11 +18,17 @@ data_array = cv2.imread(SAMPLE_IMG)
 CAMERA_TOPIC = "data/livecamera"
 RADAR_TOPIC = "data/liveradar"
 
-def save_data(topic: str, payload) -> None:
+def save_data(topic: str, payload: Union[bytes, str]) -> Optional[dict]:
+    """
+    saves live camera frames and radar data to ./liveDataLog/camera_data and ./liveDataLog/radcam_log.json
+    returns radar_object, if received, as json for processing
+    """
+    # function attribute to keep track of frame_id
     if not hasattr(save_data, "frame_id"):
         save_data.frame_id = 0
+
     cam_object = radar_object = None
-    # save cam data frames
+    # save camera data frames
     sub_ts = str(dt.datetime.now().isoformat())
     if topic == CAMERA_TOPIC:
         save_data.frame_id += 1
@@ -40,6 +45,7 @@ def save_data(topic: str, payload) -> None:
             "pub_ts": cam_ts,
             "frame_id": save_data.frame_id
         }
+    # save radar data
     if topic == RADAR_TOPIC:
         radar_object1 = {
             "topic": topic,
@@ -60,3 +66,42 @@ def save_data(topic: str, payload) -> None:
             json.dump(cam_object, f)
         if radar_object:
             json.dump(radar_object, f)
+    return radar_object
+
+"""
+class CamPayload:
+    def __init__(self, sub_ts, pub_ts, frame_id) -> None:
+        self.topic = CAMERA_TOPIC
+        self.sub_ts = sub_ts
+        self.pub_ts = pub_ts
+        self.frame_id = frame_id
+    
+    def __repr__(self) -> str:
+        return f"CamPayload(topic={self.topic}, sub_ts={self.sub_ts}, pub_ts={self.pub_ts}, frame_id={self.frame_id})"
+    
+    def to_json(self) -> dict:
+        return {
+            "topic": self.topic,
+            "sub_ts": self.sub_ts,
+            "pub_ts": self.pub_ts,
+            "frame_id": self.frame_id
+        }
+
+class RadarPayload:
+    def __init__(self, sub_ts, pub_ts, radar_json) -> None:
+        self.topic = RADAR_TOPIC
+        self.sub_ts = sub_ts
+        self.pub_ts = pub_ts
+        self.radar_json = radar_json
+    
+    def __repr__(self) -> str:
+        return f"RadarPayload(topic={self.topic}, sub_ts={self.sub_ts}, pub_ts={self.pub_ts}, radar_json={self.radar_json})"
+    
+    def to_json(self) -> dict:
+        return {
+            "topic": self.topic,
+            "sub_ts": self.sub_ts,
+            "pub_ts": self.pub_ts,
+            "radar_json": self.radar_json
+        }
+"""

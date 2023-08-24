@@ -22,8 +22,9 @@ CAMERA_TOPIC = "data/livecamera"
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
-        t = Thread(target=save_data, args=(msg.topic, msg.payload))
-        t.start()
+        # t = Thread(target=save_data, args=(msg.topic, msg.payload))
+        # t.start()
+        radar_object = save_data(msg.topic, msg.payload)
         if msg.topic == RADAR_TOPIC:
             #process_radar(msg.payload)
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")

@@ -9,6 +9,7 @@ cv2.namedWindow(f"Frame from {config['mqtt']['client_id2']}", cv2.WINDOW_NORMAL)
 SAMPLE_IMG = "data/sample_frame.png"
 data_array = cv2.imread(SAMPLE_IMG)
 
+# used in pre-recorded data playback
 def process_frames(frame_payload: bytearray) -> None:
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
@@ -20,6 +21,7 @@ def process_frames(frame_payload: bytearray) -> None:
     else:
         cv2.waitKey(0)
 
+# used in live data playback
 def process_livecam(payload: bytearray) -> None:
     timestamp = payload[-26:].decode("utf-8")
     print("Timestamp: ", timestamp)
