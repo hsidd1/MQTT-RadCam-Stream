@@ -162,18 +162,19 @@ cv2.createTrackbar(
     "scale %", "Live Camera Feed", int(xy_trackbar_scale * 100), 200, scale_callback
 )  # *100 and /100 to account for floating point usuability to downscale
 
-# static points buffer
-s1_static = StaticPoints(cnt_thres=5)
-s2_static = StaticPoints(cnt_thres=5)
-
-# previous frame buffer
-s1_display_points_prev = []
-s2_display_points_prev = []
-
 def run_visualization(cam_payload, radar_payload):
     if cam_payload is None:
         print("No camera payload received.")
         return
+    if not hasattr(run_visualization, 's1_static'):
+        run_visualization.s1_static = StaticPoints()
+    if not hasattr(run_visualization, 's2_static'):
+        run_visualization.s2_static = StaticPoints()
+    if not hasattr(run_visualization, 's1_display_points_prev'):
+        run_visualization.s1_display_points_prev = []
+    if not hasattr(run_visualization, 's2_display_points_prev'):
+        run_visualization.s2_display_points_prev = []
+    
     frame_payload = cam_payload[:-26] # remove timestamp
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
@@ -212,13 +213,13 @@ def run_visualization(cam_payload, radar_payload):
     s1_display_points = []
     s2_display_points = []
     if not radar_frame.is_empty(target_sensor_id=1):
-        s1_static.update(radar_frame.get_xyz_coord(sensor_id=1))
-        radar_frame.set_static_points(s1_static.get_static_points())
+        run_visualization.s1_static.update(radar_frame.get_xyz_coord(sensor_id=1))
+        radar_frame.set_static_points(run_visualization.s1_static.get_static_points())
         s1_display_points = radar_frame.get_points_for_display(sensor_id=1)
 
     if not radar_frame.is_empty(target_sensor_id=2):
-        s2_static.update(radar_frame.get_xyz_coord(sensor_id=2))
-        radar_frame.set_static_points(s2_static.get_static_points())
+        run_visualization.s2_static.update(radar_frame.get_xyz_coord(sensor_id=2))
+        radar_frame.set_static_points(run_visualization.s2_static.get_static_points())
         s2_display_points = radar_frame.get_points_for_display(sensor_id=2)
 
     # remove points that are out of gate area, if configured
@@ -228,13 +229,13 @@ def run_visualization(cam_payload, radar_payload):
         
     # retain previous frame if no new points
     if not s1_display_points:
-        s1_display_points = s1_display_points_prev
+        s1_display_points = run_visualization.s1_display_points_prev
     else:
-        s1_display_points_prev = s1_display_points
+        run_visualization.s1_display_points_prev = s1_display_points
     if not s2_display_points:
-        s2_display_points = s2_display_points_prev
+        s2_display_points = run_visualization.s2_display_points_prev
     else:
-        s2_display_points_prev = s2_display_points
+        run_visualization.s2_display_points_prev = s2_display_points
 
     # get all non-static points and cluster
     s1_s2_combined = [values[:-1] for values in s1_display_points + s2_display_points if values[-1] == 0]
