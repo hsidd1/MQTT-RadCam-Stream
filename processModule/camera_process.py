@@ -22,13 +22,8 @@ def process_frames(frame_payload: bytearray) -> None:
 
 def process_livecam(payload: bytearray) -> None:
     timestamp = payload[-26:].decode("utf-8")
-    print("Timestamp: ", timestamp)
+    # print("Timestamp: ", timestamp)
     frame_payload = payload[:-26] # remove timestamp
-
-    # delimiter = b'|'
-    # delimiter_index = payload.index(delimiter)
-    # frame_payload = payload[:delimiter_index]
-    # timestamp = payload[delimiter_index + len(delimiter):].decode("utf-8")
 
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
