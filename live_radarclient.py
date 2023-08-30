@@ -25,8 +25,8 @@ configFileName = 'ODS_6m_default.cfg'
 #configFileName = 'new_cfg.cfg'
 #configFileName = 'demo.cfg'
 write_radar = False
-CLIport = {}
-Dataport = {}
+CLIport1 = {}
+Dataport1 = {}
 CLIport2 = {}
 Dataport2 = {}
 byteBuffer = np.zeros(2**15,dtype = 'uint8')
@@ -39,8 +39,10 @@ byteBufferLength2 = 0
 # the configuration file to the radar
 def serialConfig1(configFileName):
     
-    global CLIport
-    global Dataport
+    global CLIport1
+    global Dataport1
+    global CLIport2
+    global Dataport2
     global yml_config
     # Open the serial ports for the configuration and the data ports
     
@@ -51,24 +53,42 @@ def serialConfig1(configFileName):
     # Windows
     str_cliport = yml_config["LiveData"]["radar"]["CLIport"]
     str_dataport = yml_config["LiveData"]["radar"]["DataPort"]
-    CLIport = serial.Serial(str_cliport, 115200)
-    Dataport = serial.Serial(str_dataport, 921600)
+    str_cliport2 = yml_config["LiveData"]["radar"]["CLIport2"]
+    str_dataport2 = yml_config["LiveData"]["radar"]["DataPort2"]
+    CLIport1 = serial.Serial(str_cliport, 115200)
+    Dataport1 = serial.Serial(str_dataport, 921600)
     # on reconnect, wait for the port to come back
     time.sleep(1)
     # flush buffers
-    CLIport.flushInput()
-    CLIport.flushOutput()
-    Dataport.flushInput()
-    Dataport.flushOutput()
+    CLIport1.flushInput()
+    CLIport1.flushOutput()
+    Dataport1.flushInput()
+    Dataport1.flushOutput()
     # Read the configuration file and send it to the board
     config = [line.rstrip('\r\n') for line in open(configFileName)]
     for i in config:
-        CLIport.write((i+'\n').encode())
+        CLIport1.write((i+'\n').encode())
+        #print(i)
+        time.sleep(0.01)
+    
+    
+    CLIport2 = serial.Serial(str_cliport2, 115200)
+    Dataport2 = serial.Serial(str_dataport2, 921600)
+    # on reconnect, wait for the port to come back
+    time.sleep(1)
+    # flush buffers
+    CLIport2.flushInput()
+    CLIport2.flushOutput()
+    Dataport2.flushInput()
+    Dataport2.flushOutput()
+    
+    for i in config:
+        CLIport2.write((i+'\n').encode())
         #print(i)
         time.sleep(0.01)
         
-    return CLIport, Dataport
-
+    return CLIport1, Dataport1, CLIport2, Dataport2
+'''
 def serialConfig2(configFileName):
     
     global CLIport2
@@ -100,7 +120,7 @@ def serialConfig2(configFileName):
         time.sleep(0.01)
         
     return CLIport2, Dataport2
-
+'''
 # ------------------------------------------------------------------
 
 # Function to parse the data inside the configuration file
@@ -222,7 +242,7 @@ def tlvHeaderDecode(data):
     return tlvType, tlvLength
 
 
-def readAndParseData(Dataport, configParameters, client, sensor_id):
+def readAndParseData(Dataport1, configParameters, client, sensor_id):
     global byteBuffer, byteBufferLength
     
     ####################################TLV types:###############################
@@ -241,7 +261,7 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
     frameNumber = 0
     detObj = {}
     detObj_log  = None
-    readBuffer = Dataport.read(Dataport.in_waiting)
+    readBuffer = Dataport1.read(Dataport1.in_waiting)
     print('----------------------------------------------------------------------------------------------')
     '''
     with open('data_serial_log.txt', 'a') as file:
@@ -518,7 +538,7 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
                 print(f"{CLIENT_ID}: Failed to send radar message to topic `{TOPIC}`\n")
     return dataOK, frameNumber, detObj
 # ------------------------------------------------------------------
-def readAndParseData2(Dataport, configParameters, client, sensor_id):
+def readAndParseData2(Dataport2, configParameters, client, sensor_id):
     global byteBuffer2, byteBufferLength2
     
     ####################################TLV types:###############################
@@ -537,7 +557,7 @@ def readAndParseData2(Dataport, configParameters, client, sensor_id):
     frameNumber = 0
     detObj = {}
     detObj_log  = None
-    readBuffer = Dataport.read(Dataport.in_waiting)
+    readBuffer = Dataport2.read(Dataport2.in_waiting)
     print('----------------------------------------------------------------------------------------------')
     '''
     with open('data_serial_log.txt', 'a') as file:
@@ -823,7 +843,8 @@ def update(client):
     y = []
       
     # Read and parse the received data
-    dataOk, frameNumber, detObj = readAndParseData(Dataport, configParameters, client, sensor_id=1)
+    dataOk, frameNumber, detObj = readAndParseData(Dataport1, configParameters, client, sensor_id=1)
+    time.sleep(0.05) 
     dataOk2, frameNumber2, detObj2 = readAndParseData2(Dataport2, configParameters, client, sensor_id=2)
     #print(f"dataOK = {dataOk}")
     #if dataOk and len(detObj["x"]) > 0:
@@ -835,22 +856,19 @@ def update(client):
 # -------------------------    MAIN   -----------------------------------------  
 
 # Configurate the serial port
-
-CLIport1, Dataport1 = serialConfig1(configFileName)
-time.sleep(0.1)
-CLIport2, Dataport2 = serialConfig2(configFileName)
-
-# Get the configuration parameters from the configuration file
-configParameters = parseConfigFile(configFileName)
-
-CLIport.write(('sensorStop\n').encode())
-
-#plt.axis([0, 10, 0, 1])
-#plt.show()
-    
-   
-# Main loop 
 if __name__ == "__main__":
+    CLIport1, Dataport1, CLIport2, Dataport2 = serialConfig1(configFileName)
+    status = (CLIport1.isOpen(), CLIport2.isOpen(), Dataport1.isOpen(), Dataport2.isOpen())
+    print(status)
+    time.sleep(0.1)
+    #CLIport2, Dataport2 = serialConfig2(configFileName)
+
+    # Get the configuration parameters from the configuration file
+    configParameters = parseConfigFile(configFileName)
+
+    CLIport1.write(('sensorStart\n').encode())
+    CLIport2.write(('sensorStart\n').encode())
+
     detObj = {}  
     client = connect_mqtt(CLIENT_ID) 
     while True:
@@ -859,25 +877,26 @@ if __name__ == "__main__":
             client.loop_start()
             dataOk1, dataOk2 = update(client)
             
-            time.sleep(0.01) 
+            time.sleep(0.05) 
             client.loop_stop()
 
         # Stop the program and close everything if Ctrl + c is pressed
         except KeyboardInterrupt:
             print("LIVE RADAR: Process Terminated...")
-            CLIport.write(('sensorStop\n').encode())
-            CLIport.close()
-            Dataport.close()
-            print(f"CLIport status: {CLIport.is_open}")
-            print(f"Dataport status: {Dataport.is_open}")
             break
         except Exception as e:
             print("LIVE RADAR: Something went wrong...")
             #print(e)
-            print(traceback.format_exc())
-            CLIport.write(('sensorStop\n').encode())
-            CLIport.close()
-            Dataport.close()
-            print(f"CLIport status: {CLIport.is_open}")
-            print(f"Dataport status: {Dataport.is_open}")            
+            print(traceback.format_exc())          
             break
+    CLIport1.write(('sensorStop\n').encode())
+    CLIport2.write(('sensorStop\n').encode())
+    CLIport1.close()
+    CLIport2.close()
+    Dataport1.close()
+    Dataport2.close()
+    print(f"CLIport status: {CLIport1.is_open}")
+    print(f"Dataport status: {Dataport1.is_open}")
+    print(f"CLIport status: {CLIport2.is_open}")
+    print(f"Dataport status: {Dataport2.is_open}")
+    
