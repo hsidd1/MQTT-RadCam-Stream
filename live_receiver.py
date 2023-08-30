@@ -1,7 +1,9 @@
 from processModule.serverConnect import connect_mqtt
 from visualizationModule.visualization_main import run_visualization
 from threading import Thread
-import yaml, traceback
+import yaml
+import json
+import traceback
 import subprocess
 from processModule.camera_process import process_livecam
 from processModule.save_data import save_data
@@ -55,8 +57,18 @@ def main():
         live_cam_process.kill()
         print("Live camera process killed.")
         client.disconnect()
-        with open("liveDataLog/radcam_log.json", "a") as f:
-            f.write("]")
+        with open("liveDataLog/radcam_log.json", "r") as f:
+            data = f.read()
+        try:
+            json_data = json.loads(data)
+        except json.JSONDecodeError:
+            data = data.rstrip()
+            if data.startswith("[") and not data.endswith("]"):
+                data += "]"
+            data = data.replace("],{", ",{")
+            with open("liveDataLog/radcam_log.json", "w") as f:
+                f.write(data)
+
     try:
         client.loop_forever()
     except KeyboardInterrupt:
@@ -64,7 +76,6 @@ def main():
         exit_handler(client)
     except Exception as e:
         print("RECEIVER: Something went wrong. Exiting Receiver...")
-        #print(e)
         print(traceback.format_exc())
         exit_handler(client)
 
