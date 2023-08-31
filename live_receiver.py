@@ -1,5 +1,5 @@
 from processModule.serverConnect import connect_mqtt
-from visualizationModule.visualization_main import run_visualization
+# from visualizationModule.visualization_main import run_visualization
 from threading import Thread
 import yaml
 import json
