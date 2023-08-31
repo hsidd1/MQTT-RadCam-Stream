@@ -10,7 +10,7 @@ git clone https://github.com/hsidd1/MQTT-RadCam-Stream.git
 ```
 Install dependencies via pip:
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 ## Configuration - General
 
