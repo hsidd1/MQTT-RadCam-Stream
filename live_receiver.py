@@ -1,5 +1,4 @@
 from processModule.serverConnect import connect_mqtt
-from visualizationModule.visualization_main import run_visualization
 from threading import Thread
 import yaml
 import json
@@ -27,20 +26,12 @@ def subscribe(client, topic):
     def on_message(client, userdata, msg):
         t = Thread(target=save_data, args=(msg.topic, msg.payload))
         t.start()
-        cam_payload = radar_payload = None
         if msg.topic == RADAR_TOPIC:
             #process_radar(msg.payload)
-            radar_payload = msg.payload
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
         if msg.topic == CAMERA_TOPIC:
-            cam_payload = msg.payload
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
-            # process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
-        try:
-            run_visualization(cam_payload, radar_payload)
-        # do nothing if payload is None
-        except TypeError:
-            pass
+            process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
     client.subscribe(topic)
     client.on_message = on_message
 
