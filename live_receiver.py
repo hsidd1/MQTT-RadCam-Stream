@@ -37,7 +37,8 @@ def subscribe(client, topic):
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
             # process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
         try:
-            run_visualization(cam_payload, radar_payload)
+            #run_visualization(cam_payload, radar_payload)
+            pass
         # do nothing if payload is None
         except TypeError:
             pass
