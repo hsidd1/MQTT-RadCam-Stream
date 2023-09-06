@@ -24,8 +24,9 @@ def process_frames(frame_payload: bytearray) -> None:
 # used in live data playback
 def process_livecam(payload: bytearray) -> None:
     timestamp = payload[-26:].decode("utf-8")
-    print("Timestamp: ", timestamp)
+    # print("Timestamp: ", timestamp)
     frame_payload = payload[:-26] # remove timestamp
+
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
     # if not hasattr(process_livecam, 'window_created'):

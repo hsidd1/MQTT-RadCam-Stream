@@ -1,15 +1,13 @@
 import queue
 from processModule.serverConnect import connect_mqtt
 from visualizationModule.visualization_main import run_visualization
-from threading import Thread, Event
-import yaml, traceback
+from threading import Thread
+import yaml
+import json
+import traceback
 import subprocess
 from processModule.camera_process import process_livecam
 from processModule.save_data import save_data
-from processModule.radar_process import process_radar
-import time
-import json
-
 """
 Receiver client for live radar and camera data. Requires radar to be connected. 
 This program receives and processes live radar and camera data from the device clients.
@@ -36,7 +34,7 @@ def subscribe(client, topic):
         global latest_radar, latest_camera
         # cam_payload = radar_payload = None
         if msg.topic == RADAR_TOPIC:
-            # process_radar(msg.payload)
+            #process_radar(msg.payload)
             radar_payload = msg.payload
             latest_radar = radar_payload
             # radar_data_queue.put(radar_payload)
@@ -45,27 +43,24 @@ def subscribe(client, topic):
             cam_payload = msg.payload
             latest_camera = cam_payload
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
-            # camera_data_queue.put(cam_payload)
             # process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
         try:
             run_visualization(latest_camera, latest_radar)
         except TypeError:
             pass
-
     client.subscribe(topic)
     client.on_message = on_message
-
 
 def main():
     live_radar_process = subprocess.Popen(["python", "live_radarclient.py"])
     live_cam_process = subprocess.Popen(["python", "live_cameraclient.py"])
     client = connect_mqtt("PC")
-    subscribe(client, topic=RADAR_TOPIC)
-    subscribe(client, topic=CAMERA_TOPIC)
+    subscribe(client, topic = RADAR_TOPIC)
+    subscribe(client, topic = CAMERA_TOPIC)
 
     def exit_handler(client):
         live_radar_process.kill()
-        print("Live radar process killed.")
+        print("Live radar process killed.") 
         live_cam_process.kill()
         print("Live camera process killed.")
         client.disconnect()
@@ -88,9 +83,9 @@ def main():
         exit_handler(client)
     except Exception as e:
         print("RECEIVER: Something went wrong. Exiting Receiver...")
+        #print(e)
         print(traceback.format_exc())
         exit_handler(client)
-
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-from typing import Union, Optional
 import cv2 
 import numpy as np
 import json 
@@ -19,7 +18,7 @@ data_array = cv2.imread(SAMPLE_IMG)
 CAMERA_TOPIC = "data/livecamera"
 RADAR_TOPIC = "data/liveradar"
 
-def save_data(topic: str, payload: Union[bytes, str]) -> Optional[dict]:
+def save_data(topic: str, payload: bytes | str) -> dict | None:
     """
     saves live camera frames and radar data to ./liveDataLog/camera_data and ./liveDataLog/radcam_log.json
     """
