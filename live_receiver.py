@@ -51,12 +51,25 @@ def subscribe(client, topic):
     client.subscribe(topic)
     client.on_message = on_message
 
+def cam_reciever(client):
+    subscribe(client, topic=CAMERA_TOPIC)
+
+def rad_reciever(client):
+    subscribe(client, topic=RADAR_TOPIC)
+
 def main():
+    client = connect_mqtt("PC")
+
+    cam_thread = Thread(target=cam_reciever, args=(client,))
+    rad_thread = Thread(target=rad_reciever, args=(client,))
+
     live_radar_process = subprocess.Popen(["python", "live_radarclient.py"])
     live_cam_process = subprocess.Popen(["python", "live_cameraclient.py"])
-    client = connect_mqtt("PC")
-    subscribe(client, topic = RADAR_TOPIC)
-    subscribe(client, topic = CAMERA_TOPIC)
+
+    # subscribe(client, topic = RADAR_TOPIC)
+    # subscribe(client, topic = CAMERA_TOPIC)
+    cam_thread.start()
+    rad_thread.start()
 
     def exit_handler(client):
         live_radar_process.kill()
@@ -64,6 +77,8 @@ def main():
         live_cam_process.kill()
         print("Live camera process killed.")
         client.disconnect()
+        cam_thread.join()
+        rad_thread.join()
         with open("liveDataLog/radcam_log.json", "r") as f:
             data = f.read()
         try:

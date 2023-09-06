@@ -290,7 +290,7 @@ def run_visualization(cam_payload, radar_payload):
 
     # after drawing points on frames, imshow the frames
     cv2.imshow("Live Camera Feed", frame)
-    cv2.waitKey(1)
+    cv2.waitKey(0.01)
     # # Key controls
     # key = cv2.waitKey(wait_ms) & 0xFF
     # if key == ord("q"):  # quit program if 'q' is pressed
