@@ -21,12 +21,12 @@ LiveData:
     qos: 0
     client_id: "LIVE RADAR"
     # radar 1:
-    CLIport: "COM3"
-    DataPort: "COM4"
+    CLIport: "COM4"
+    DataPort: "COM3"
     # radar 2:
-    CLIport2: "COM5"
-    DataPort2: "COM6"
-  camera:
-    width: 480
-    height: 640
+    CLIport2: "COM6"
+    DataPort2: "COM5"
+  camera: # Try bigger frame --> Increase the resolution!!!
+    width: 640
+    height: 480
     fps: 10

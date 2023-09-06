@@ -4,6 +4,7 @@ import yaml
 import datetime as dt
 import traceback
 import time
+import pafy
 
 """
 Live client for camera device. Publishes frames and corresponding timestamps
@@ -28,7 +29,11 @@ def publish(client):
 
     global cap
 
-    cap = cv2.VideoCapture(1, cv2.CAP_DSHOW) # external camera
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) # external camera
+    # url = "http://10.27.253.104/mjpg/1/video.mjpg?timestamp=1693401699602"
+    # video = pafy.new(url)
+    # best = video.getbest(preftype='mp4').url
+    # cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)  # external camera
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, config["LiveData"]["camera"]["width"])
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config["LiveData"]["camera"]["height"])
     # cap.set(cv2.CAP_PROP_FPS, config["LiveData"]["camera"]["fps"])
@@ -48,7 +53,7 @@ def publish(client):
                 status = res[0]
                 if status == 0:
                     print(f"Send {len(payload)} bytes to topic data/livecamera")
-                time.sleep(1)
+                time.sleep(1)# increase from 1 (too slow) 0.1 = 10fps
             else:
                 print("No frame received.")
         except KeyboardInterrupt:

@@ -20,8 +20,8 @@ TOPIC = yml_config["LiveData"]["radar"]["topic"]
 CLIENT_ID = yml_config["LiveData"]["radar"]["client_id"]
 # Change the configuration file name
 #configFileName = 'xwr68xxconfig.cfg'
-configFileName = 'ODS_6m_default.cfg'
-#configFileName = 'ISK_6m_default.cfg'
+# configFileName = 'ODS_6m_default.cfg'
+configFileName = 'ISK_6m_staticRetention.cfg'
 #configFileName = 'new_cfg.cfg'
 #configFileName = 'demo.cfg'
 write_radar = False
@@ -240,14 +240,14 @@ def readAndParseData(Dataport, configParameters, client, sensor_id):
     detObj = {}
     detObj_log  = None
     readBuffer = Dataport.read(Dataport.in_waiting)
-    print('----------------------------------------------------------------------------------------------')
+    print('-------------------------------RADAR CLIENT---------------------------------------------------------------')
     '''
     with open('data_serial_log.txt', 'a') as file:
         file.write(str(readBuffer)+'\n'+'\n'+'\n')
     '''
     byteVec = np.frombuffer(readBuffer, dtype = 'uint8')
     byteCount = len(byteVec)
-    #print('byteCount is:  '+str(byteCount))
+    print('byteCount is:  '+str(byteCount))
     
     # Check that the buffer is not full, and then add the data to the buffer
     if (byteBufferLength + byteCount) < maxBufferSize:

@@ -28,9 +28,9 @@ def process_livecam(payload: bytearray) -> None:
     frame_payload = payload[:-26] # remove timestamp
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
-    if not hasattr(process_livecam, 'window_created'):
-        cv2.namedWindow("Live Camera Feed")
-        process_livecam.window_created = True
+    # if not hasattr(process_livecam, 'window_created'):
+    #     cv2.namedWindow("Live Camera Feed TEST")
+    #     process_livecam.window_created = True
     font = cv2.FONT_HERSHEY_SIMPLEX
     bottom_left_corner = (10, 30)
     font_scale = 1
@@ -38,8 +38,9 @@ def process_livecam(payload: bytearray) -> None:
     line_type = 2
     frame = frame.reshape(data_array.shape) # (480, 640, 3)
     cv2.putText(frame, timestamp, bottom_left_corner, font, font_scale, font_color, line_type)
-    cv2.imshow("Live Camera Feed", frame)
+    cv2.imshow("Live Camera Feed CAM_PRO.py", frame)
     if config["CameraOutput"]["continuous_frame_mode"]:
         cv2.waitKey(1)
+        print('process_livecam done (create frame +add t)')
     else:
         cv2.waitKey(0)
