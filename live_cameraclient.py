@@ -53,7 +53,7 @@ def publish(client):
                 status = res[0]
                 if status == 0:
                     print(f"Send {len(payload)} bytes to topic data/livecamera")
-                time.sleep(1)# increase from 1 (too slow) 0.1 = 10fps
+                time.sleep(1)
             else:
                 print("No frame received.")
         except KeyboardInterrupt:
