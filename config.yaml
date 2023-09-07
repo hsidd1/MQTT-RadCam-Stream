@@ -26,7 +26,7 @@ LiveData:
     # radar 2:
     CLIport2: "COM6"
     DataPort2: "COM5"
-  camera: # Try bigger frame --> Increase the resolution!!!
+  camera:
     width: 640
     height: 480
     fps: 10
