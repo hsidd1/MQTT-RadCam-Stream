@@ -2,6 +2,7 @@ from .preprocess import rot_mtx_entry, rot_mtx_exit, load_data_tlv
 from .radar_points import StaticPoints, RadarFrame
 from .radar_clustering import *
 import yaml, cv2
+import time
 
 with open("visualizationModule/visualconfig.yaml", "r") as f:
     v_config = yaml.safe_load(f)
@@ -179,12 +180,6 @@ cv2.createTrackbar(
 
 
 def run_visualization(cam_payload, radar_payload):
-    print('RUN VIS')
-    print('-------Data Check [vis.py]---------')
-    timestamp = cam_payload[-26:].decode("utf-8")
-    print("Timestamp: ", timestamp)
-    print(radar_payload)
-    print('-------Data Check [vis.py]---------')
     if cam_payload is None:
         print("No camera payload received.")
         return
@@ -200,8 +195,6 @@ def run_visualization(cam_payload, radar_payload):
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
     frame = frame.reshape((480, 640, 3))
-    cv2.imshow("DEBUG Frame in VisMain", frame)  # confirm that frame is making it to the function
-    cv2.waitKey(1)  #
     if not hasattr(run_visualization, 'window_created'):
         cv2.namedWindow("Live Camera Feed")
         run_visualization.window_created = True
@@ -227,8 +220,6 @@ def run_visualization(cam_payload, radar_payload):
     # radar_frame = radar_data.take_next_frame(interval=100)
     # print(f"DEBUG:::radar_frame: {radar_frame}")
     radar_frame = RadarFrame(radar_data)
-    print('Radar Frame Success?')
-    # radar_frame = None # temp for debug
     # if radar_frame.is_empty():# ORIGINAL, REVERT TO THIS B4 PUSHING
     if radar_frame is None:
         print('early termination?')
@@ -287,10 +278,11 @@ def run_visualization(cam_payload, radar_payload):
         draw_radar_points(frame, s2_display_points, sensor_id=2)
 
     display_control_info(frame, width)
-
+    end_vis = time.time()
     # after drawing points on frames, imshow the frames
     cv2.imshow("Live Camera Feed", frame)
-    cv2.waitKey(0.01)
+    cv2.waitKey(1)
+
     # # Key controls
     # key = cv2.waitKey(wait_ms) & 0xFF
     # if key == ord("q"):  # quit program if 'q' is pressed

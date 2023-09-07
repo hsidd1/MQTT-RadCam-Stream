@@ -3,7 +3,6 @@ import numpy as np
 
 class RadarFrame:
     def __init__(self, data: "list[dict[str, int or float]]"):
-        print('CREATING RADAR FRAME') # DEBUG (delete)
         """
         Radar frame object contains data for a defined frame interval in lists for each attribute
         param data: a list of dictionaries
@@ -22,9 +21,6 @@ class RadarFrame:
         self.z = []
         self.ts = []
         self.is_static = []  # -1 default, 1 static, 0 not static.
-        print('-------DATA SENT TO RADARFRAME--------')
-        print(data)
-        print('-------DATA SENT TO RADARFRAME--------')
         for item in data:
             self.sid.append(item["sensorId"])
             self.x.append(item["x"])
@@ -32,7 +28,6 @@ class RadarFrame:
             self.z.append(item["z"])
             self.ts.append(item["timestamp"])
             self.is_static.append(-1)  # update in main program with static points class
-        print('RADAR FRAME CREATED')
 
     def __repr__(self):
         class_str = f"RadarFrame object with {len(self.sid)} points."
