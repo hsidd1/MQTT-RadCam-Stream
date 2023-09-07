@@ -91,39 +91,6 @@ def serialConfig(configFileName):
         time.sleep(0.01)
         
     return CLIport1, Dataport1, CLIport2, Dataport2
-'''
-def serialConfig2(configFileName):
-    
-    global CLIport2
-    global Dataport2
-    global yml_config
-    # Open the serial ports for the configuration and the data ports
-    
-    # Raspberry pi
-    #CLIport = serial.Serial('/dev/ttyACM0', 115200)
-    #Dataport = serial.Serial('/dev/ttyACM1', 921600)
-    
-    # Windows
-    str_cliport2 = yml_config["LiveData"]["radar"]["CLIport2"]
-    str_dataport2 = yml_config["LiveData"]["radar"]["DataPort2"]
-    CLIport2 = serial.Serial(str_cliport2, 115200)
-    Dataport2 = serial.Serial(str_dataport2, 921600)
-    # on reconnect, wait for the port to come back
-    time.sleep(1)
-    # flush buffers
-    CLIport2.flushInput()
-    CLIport2.flushOutput()
-    Dataport2.flushInput()
-    Dataport2.flushOutput()
-    # Read the configuration file and send it to the board
-    config = [line.rstrip('\r\n') for line in open(configFileName)]
-    for i in config:
-        CLIport2.write((i+'\n').encode())
-        #print(i)
-        time.sleep(0.01)
-        
-    return CLIport2, Dataport2
-'''
 # ------------------------------------------------------------------
 
 # Function to parse the data inside the configuration file
