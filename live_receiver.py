@@ -1,5 +1,5 @@
-import queue
 from processModule.serverConnect import connect_mqtt
+
 from visualizationModule.visualization_main import run_visualization
 from threading import Thread
 import yaml
@@ -8,6 +8,7 @@ import traceback
 import subprocess
 from processModule.camera_process import process_livecam
 from processModule.save_data import save_data
+
 """
 Receiver client for live radar and camera data. Requires radar to be connected. 
 This program receives and processes live radar and camera data from the device clients.
@@ -46,8 +47,10 @@ def subscribe(client, topic):
             # process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
         try:
             run_visualization(latest_camera, latest_radar)
+            # run_visualization(cam_payload, radar_payload)
         except TypeError:
             pass
+
     client.subscribe(topic)
     client.on_message = on_message
 
@@ -56,6 +59,7 @@ def cam_reciever(client):
 
 def rad_reciever(client):
     subscribe(client, topic=RADAR_TOPIC)
+
 
 def main():
     client = connect_mqtt("PC")
@@ -73,7 +77,7 @@ def main():
 
     def exit_handler(client):
         live_radar_process.kill()
-        print("Live radar process killed.") 
+        print("Live radar process killed.")
         live_cam_process.kill()
         print("Live camera process killed.")
         client.disconnect()
@@ -101,6 +105,7 @@ def main():
         #print(e)
         print(traceback.format_exc())
         exit_handler(client)
+
 
 if __name__ == "__main__":
     main()

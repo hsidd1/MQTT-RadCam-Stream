@@ -29,4 +29,4 @@ LiveData:
   camera:
     width: 640
     height: 480
-    fps: 10
+    fps: 20 # capped at 9fps for 1280x720, 5fps for 1920x1080, 28 fps for 640x480
