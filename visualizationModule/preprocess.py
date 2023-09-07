@@ -108,7 +108,4 @@ def load_data_tlv(data: json = None) -> RadarData:
                     s["timestamp"] = milliseconds
                 radar_points.append(s)
 
-    print("---------check radar point format [preprocess.py] -----------")
-    print(radar_points)
-    # return RadarData(radar_points)
-    return radar_points # testing smthn....
+    return radar_points 
