@@ -24,9 +24,11 @@ LiveData:
     CLIport: "COM3"
     DataPort: "COM4"
     # radar 2:
-    CLIport2: "COM5"
+    CLIport2: "COM7"
     DataPort2: "COM6"
   camera:
-    width: 480
-    height: 640
+    width: 1280
+    height: 720
     fps: 10
+  panel:
+     COMport:"COM5"
