@@ -30,7 +30,6 @@ def publish(client):
     cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)  # external camera
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config["LiveData"]["camera"]["width"])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config["LiveData"]["camera"]["height"])
-    cap.set(cv2.CAP_PROP_FPS, config["LiveData"]["camera"]["fps"])
     client = connect_mqtt("Camera")
     # num_frames = 120
     # start = time.perf_counter()
