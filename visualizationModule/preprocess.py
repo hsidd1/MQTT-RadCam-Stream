@@ -56,21 +56,56 @@ def load_data_tlv(data: json = None) -> RadarData:
     if data is None:
         # add empty lists for everything
         return RadarData([])
-    radar_points = []
-    for item in data:
-        for j in range(len(item["x"])):
-            s = dict()
-            s["sensorId"] = item["Sensor_id"]
-            s["x"] = item["x"][j] * 1000  # converting to mm
-            s["y"] = item["y"][j] * 1000
-            s["z"] = item["z"][j] * 1000
-            #s["timestamp"] = int(item["time"].replace(":","").replace(".",""))
-            time_str = item["time"]
-            time_obj = datetime.datetime.strptime(time_str, "%H:%M:%S.%f")
+    if isinstance(data, bytes):
+        # decode JSON
+        try:
+            data = json.loads(data.decode("utf-8"))
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+            return RadarData([])
 
-            # convert datetime to milliseconds
-            milliseconds = int(time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second) * 1000 + time_obj.microsecond // 1000
-            s["timestamp"] = milliseconds
+    radar_points = []
+    if isinstance(data, dict):
+        # Handle the case when data is a single JSON object
+        item = data
+        x_list = item.get("x", [])
+        y_list = item.get("y", [])
+        z_list = item.get("z", [])
+        for j in range(len(x_list)):
+            s = dict()
+            s["sensorId"] = item.get("Sensor_id", None)
+            s["x"] = x_list[j] * 1000  # converting to mm
+            s["y"] = y_list[j] * 1000
+            s["z"] = z_list[j] * 1000
+            time_str = item.get("time", "")
+            if time_str:
+                time_obj = datetime.datetime.strptime(time_str, "%H:%M:%S.%f")
+                milliseconds = int(
+                    time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second
+                ) * 1000 + time_obj.microsecond // 1000
+                s["timestamp"] = milliseconds
             radar_points.append(s)
 
-    return RadarData(radar_points)
+    elif isinstance(data, list):
+        # Handle the case when data is a list of JSON objects
+        for item in data:
+            item_dict = json.loads(item)
+            x_list = item_dict.get("x", [])
+            y_list = item_dict.get("y", [])
+            z_list = item_dict.get("z", [])
+            for j in range(len(x_list)):
+                s = dict()
+                s["sensorId"] = item_dict.get("Sensor_id", None)
+                s["x"] = x_list[j] * 1000  # converting to mm
+                s["y"] = y_list[j] * 1000
+                s["z"] = z_list[j] * 1000
+                time_str = item_dict.get("time", "")
+                if time_str:
+                    time_obj = datetime.datetime.strptime(time_str, "%H:%M:%S.%f")
+                    milliseconds = int(
+                        time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second
+                    ) * 1000 + time_obj.microsecond // 1000
+                    s["timestamp"] = milliseconds
+                radar_points.append(s)
+
+    return radar_points 

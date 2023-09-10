@@ -20,8 +20,9 @@ with open("config.yaml", "r") as f:
 TOPIC = yml_config["LiveData"]["radar"]["topic"]
 CLIENT_ID = yml_config["LiveData"]["radar"]["client_id"]
 # Change the configuration file name
+configFileName = 'ISK_6m_staticRetention.cfg'
 # configFileName = 'xwr68xxconfig.cfg'
-configFileName = "ODS_6m_default.cfg"
+# configFileName = "ODS_6m_default.cfg"
 # configFileName = 'ISK_6m_default.cfg'
 # configFileName = 'new_cfg.cfg'
 # configFileName = 'demo.cfg'
@@ -35,22 +36,22 @@ byteBuffer2 = np.zeros(2**15, dtype="uint8")
 byteBufferLength = 0
 byteBufferLength2 = 0
 
-
-# -------------------------------------------------------------------
+#-------------------------------------------------------------------
 # Function to configure the serial ports and send the data from
 # the configuration file to the radar
 def serialConfig1(configFileName):
+    
     global CLIport1
     global Dataport1
     global CLIport2
     global Dataport2
     global yml_config
     # Open the serial ports for the configuration and the data ports
-
+    
     # Raspberry pi
-    # CLIport = serial.Serial('/dev/ttyACM0', 115200)
-    # Dataport = serial.Serial('/dev/ttyACM1', 921600)
-
+    #CLIport = serial.Serial('/dev/ttyACM0', 115200)
+    #Dataport = serial.Serial('/dev/ttyACM1', 921600)
+    
     # Windows
     str_cliport = yml_config["LiveData"]["radar"]["CLIport"]
     str_dataport = yml_config["LiveData"]["radar"]["DataPort"]
@@ -81,16 +82,14 @@ def serialConfig1(configFileName):
     CLIport2.flushOutput()
     Dataport2.flushInput()
     Dataport2.flushOutput()
-
+    
     for i in config:
-        CLIport2.write((i + "\n").encode())
-        # print(i)
+        CLIport2.write((i+'\n').encode())
+        #print(i)
         time.sleep(0.01)
-
+        
     return CLIport1, Dataport1, CLIport2, Dataport2
-
-
-"""
+'''
 def serialConfig2(configFileName):
     
     global CLIport2
@@ -122,7 +121,7 @@ def serialConfig2(configFileName):
         time.sleep(0.01)
         
     return CLIport2, Dataport2
-"""
+'''
 # ------------------------------------------------------------------
 
 
@@ -293,14 +292,12 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id):
     detObj = {}
     detObj_log = None
     readBuffer = Dataport1.read(Dataport1.in_waiting)
-    print(
-        "----------------------------------------------------------------------------------------------"
-    )
-    """
+    print('-----------------------------Radar Client-----------------------------------------------------------------')
+    '''
     with open('data_serial_log.txt', 'a') as file:
         file.write(str(readBuffer)+'\n'+'\n'+'\n')
-    """
-    byteVec = np.frombuffer(readBuffer, dtype="uint8")
+    '''
+    byteVec = np.frombuffer(readBuffer, dtype = 'uint8')
     byteCount = len(byteVec)
     # print('byteCount is:  '+str(byteCount))
 
@@ -313,6 +310,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id):
 
     # Check that the buffer has some data
     if byteBufferLength > 16:
+        
         # Check for all possible locations of the magic word
         possibleLocs = np.where(byteBuffer == magicWord[0])[0]
 
@@ -325,6 +323,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id):
 
         # Check that startIdx is not empty
         if startIdx:
+            
             # Remove the data before the first start index
             if startIdx[0] > 0 and startIdx[0] < byteBufferLength:
                 byteBuffer[: byteBufferLength - startIdx[0]] = byteBuffer[
@@ -394,6 +393,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id):
 
         # Read the TLV messages
         for tlvIdx in range(numTLVs):
+            
             # word array to convert 4 bytes to a 32 bit number
             word = [1, 2**8, 2**16, 2**24]
 
@@ -571,6 +571,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id):
                 idX += tlv_length - 1
             ##########################---Target List TLV---############################
             elif tlv_type == MMWDEMO_OUTPUT_MSG_TRACKERPROC_TARGET_HEIGHT:
+                            
                 word = [1, 2**8, 2**16, 2**24]
                 tid = byteBuffer[idX]
                 idX += 1
@@ -666,12 +667,8 @@ def readAndParseData2(Dataport2, configParameters, client, sensor_id):
         if startIdx:
             # Remove the data before the first start index
             if startIdx[0] > 0 and startIdx[0] < byteBufferLength2:
-                byteBuffer2[: byteBufferLength2 - startIdx[0]] = byteBuffer2[
-                    startIdx[0] : byteBufferLength2
-                ]
-                byteBuffer2[byteBufferLength2 - startIdx[0] :] = np.zeros(
-                    len(byteBuffer2[byteBufferLength2 - startIdx[0] :]), dtype="uint8"
-                )
+                byteBuffer2[:byteBufferLength2-startIdx[0]] = byteBuffer2[startIdx[0]:byteBufferLength2]
+                byteBuffer2[byteBufferLength2-startIdx[0]:] = np.zeros(len(byteBuffer2[byteBufferLength2-startIdx[0]:]),dtype = 'uint8')
                 byteBufferLength2 = byteBufferLength2 - startIdx[0]
 
             # Check that there have no errors with the byte buffer length
@@ -953,6 +950,7 @@ def readAndParseData2(Dataport2, configParameters, client, sensor_id):
 # ------------------------------------------------------------------
 # Funtion to update the data and display in the plot
 def update(client):
+     
     dataOk = 0
     global detObj
     x = []

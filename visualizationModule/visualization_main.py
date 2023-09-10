@@ -2,6 +2,7 @@ from .preprocess import rot_mtx_entry, rot_mtx_exit, load_data_tlv
 from .radar_points import StaticPoints, RadarFrame
 from .radar_clustering import *
 import yaml, cv2
+import time
 
 with open("visualizationModule/visualconfig.yaml", "r") as f:
     v_config = yaml.safe_load(f)
@@ -33,24 +34,29 @@ BLUE = (255, 0, 0)
 RED = (0, 0, 255)
 ORANGE = (0, 165, 255)
 
+
 def washout(color, factor=0.2):
     # create washed out color
     return (int(color[0] * factor), int(color[1] * factor), int(color[2] * factor))
+
 
 def x_trackbar_callback(*args):
     # updates global x offset by trackbar value
     global slider_xoffset
     slider_xoffset = cv2.getTrackbarPos("x offset", "Live Camera Feed")
 
+
 def y_trackbar_callback(*args):
     # updates global y offset by trackbar value
     global slider_yoffset
     slider_yoffset = cv2.getTrackbarPos("y offset", "Live Camera Feed")
 
+
 def scale_callback(*args):
     # multiplies x and y by scale value from trackbar
     global xy_trackbar_scale
     xy_trackbar_scale = cv2.getTrackbarPos("scale %", "Live Camera Feed") / 100
+
 
 # draw gate at top left of window, with width and height of gate.
 # Scale to match gate location with trackbar - returns valid display region
@@ -67,6 +73,7 @@ def draw_gate_topleft(frame):
     )
     cv2.rectangle(frame, rect_start, rect_end, BLUE, 2)
     return rect_start, rect_end
+
 
 def remove_points_outside_gate(points, rect_start, rect_end) -> list:
     """Remove points that are outside the gate area. 
@@ -86,6 +93,7 @@ def remove_points_outside_gate(points, rect_start, rect_end) -> list:
         points_in_gate.append(coord)
     return points_in_gate
 
+
 def draw_radar_points(frame, points, sensor_id):
     if sensor_id == 1:
         color = GREEN
@@ -95,7 +103,7 @@ def draw_radar_points(frame, points, sensor_id):
         raise
     for coord in points:
         x = int((coord[0] + offsetx) * scalemm2px)
-        y = int((-coord[1] + offsety) * scalemm2px)  # y axis is flipped
+        y = int((-coord[1] + offsety) * scalemm2px)  # y-axis is flipped
         z = int(coord[2] * scalemm2px)  # z is not used
         static = coord[3]
 
@@ -108,6 +116,7 @@ def draw_radar_points(frame, points, sensor_id):
             cv2.circle(frame, (x, y), 4, washout(color), -1)
         else:
             cv2.circle(frame, (x, y), 4, color, -1)
+
 
 def draw_clustered_points(frame, processed_centroids, color=RED):
     for cluster in processed_centroids:
@@ -122,34 +131,41 @@ def draw_clustered_points(frame, processed_centroids, color=RED):
         y += slider_yoffset
         cv2.circle(frame, (x, y), 10, color, -1)
 
+
 def draw_bbox(frame, centroids, cluster_point_cloud):
     for i in enumerate(centroids):
         x1, y1, x2, y2 = cluster_bbox(cluster_point_cloud, i[0])
         # convert mm to px 
-        x1, y1, x2, y2 = int(x1 + offsetx) * scalemm2px, int(-y1 + offsety) * scalemm2px, int(x2 + offsetx) * scalemm2px, int(-y2 + offsety) * scalemm2px
+        x1, y1, x2, y2 = int(x1 + offsetx) * scalemm2px, int(-y1 + offsety) * scalemm2px, int(
+            x2 + offsetx) * scalemm2px, int(-y2 + offsety) * scalemm2px
         # modify based on trackbar
-        x1, y1, x2, y2 = int(x1 * xy_trackbar_scale) + slider_xoffset, int(y1 * xy_trackbar_scale) + slider_yoffset, int(x2 * xy_trackbar_scale) + slider_xoffset, int(y2 * xy_trackbar_scale) + slider_yoffset
+        x1, y1, x2, y2 = int(x1 * xy_trackbar_scale) + slider_xoffset, int(
+            y1 * xy_trackbar_scale) + slider_yoffset, int(x2 * xy_trackbar_scale) + slider_xoffset, int(
+            y2 * xy_trackbar_scale) + slider_yoffset
         object_size, object_height = obj_height(cluster_point_cloud, i[0])
         rect = cv2.rectangle(frame, (x1, y1), (x2, y2), ORANGE, 1)
         size, _ = cv2.getTextSize(f"{object_height:.1f} mm", cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
         text_width, text_height = size
-        cv2.putText(rect, f"{object_height:.1f} mm", (x1, y1 - text_height - 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, ORANGE, 2)
-        
+        cv2.putText(rect, f"{object_height:.1f} mm", (x1, y1 - text_height - 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, ORANGE,
+                    2)
+
+
 def display_control_info(frame, width):
     cv2.putText(
-        frame, 
-        "Controls - 'q': quit  'p': pause", 
-        (width-175, 20), 
-        cv2.FONT_HERSHEY_SIMPLEX, 
+        frame,
+        "Controls - 'q': quit  'p': pause",
+        (width - 175, 20),
+        cv2.FONT_HERSHEY_SIMPLEX,
         0.35, (0, 0, 150), 1
-        )
+    )
     cv2.putText(
         frame,
         "scale/offset gate region with trackbar",
-        (width-217, 40),
+        (width - 217, 40),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.35, (0, 0, 150), 1
-        )
+    )
+
 
 cv2.namedWindow("Live Camera Feed")
 cv2.createTrackbar(
@@ -161,6 +177,7 @@ cv2.createTrackbar(
 cv2.createTrackbar(
     "scale %", "Live Camera Feed", int(xy_trackbar_scale * 100), 200, scale_callback
 )  # *100 and /100 to account for floating point usuability to downscale
+
 
 def run_visualization(cam_payload, radar_payload):
     if cam_payload is None:
@@ -174,8 +191,7 @@ def run_visualization(cam_payload, radar_payload):
         run_visualization.s1_display_points_prev = []
     if not hasattr(run_visualization, 's2_display_points_prev'):
         run_visualization.s2_display_points_prev = []
-    
-    frame_payload = cam_payload[:-26] # remove timestamp
+    frame_payload = cam_payload[:-26]  # remove timestamp
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
     frame = frame.reshape((480, 640, 3))
@@ -195,15 +211,20 @@ def run_visualization(cam_payload, radar_payload):
     frame = cv2.resize(frame, (round(width), round(height)))  # reduce frame size
     frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
     height, width = frame.shape[:2]
-    
-    # draw gate area and get gate area coordinates
-    gate_tl, gate_br = draw_gate_topleft()
 
+    # draw gate area and get gate area coordinates
+    gate_tl, gate_br = draw_gate_topleft(frame)
+
+    radar_data = load_data_tlv(radar_payload)
     # take points in current RADAR frame
-    radar_frame = RadarFrame(load_data_tlv(radar_payload))
-    if radar_frame.is_empty():
+    # radar_frame = radar_data.take_next_frame(interval=100)
+    # print(f"DEBUG:::radar_frame: {radar_frame}")
+    radar_frame = RadarFrame(radar_data)
+    # if radar_frame.is_empty():# ORIGINAL, REVERT TO THIS B4 PUSHING
+    if radar_frame is None:
+        print('early termination?')
         return
-    radar_frame.transform_coord(
+    radar_frame.frame_transform_coord(
         s1_rotz, s1_rotx, s2_rotz, s2_rotx, offsetx, offsety, offsetz
     )
     print(f"Radar frame transformed.\n")
@@ -226,7 +247,7 @@ def run_visualization(cam_payload, radar_payload):
     if v_config["remove_noise"]:
         s1_display_points = remove_points_outside_gate(s1_display_points, gate_tl, gate_br)
         s2_display_points = remove_points_outside_gate(s2_display_points, gate_tl, gate_br)
-        
+
     # retain previous frame if no new points
     if not s1_display_points:
         s1_display_points = run_visualization.s1_display_points_prev
@@ -245,7 +266,8 @@ def run_visualization(cam_payload, radar_payload):
         # cluster and their associated point cloud
         draw_clustered_points(frame, centroids)  # may not be in the abs center of bbox --> "center of mass", not area
         # centroid.
-        draw_clustered_points(frame, cluster_point_cloud, color=BLUE)  # highlight the points that belong to the detected
+        draw_clustered_points(frame, cluster_point_cloud,
+                              color=BLUE)  # highlight the points that belong to the detected
         # obj
         draw_bbox(frame, centroids, cluster_point_cloud)  # draw the bounding box of each cluster
 
@@ -256,10 +278,11 @@ def run_visualization(cam_payload, radar_payload):
         draw_radar_points(frame, s2_display_points, sensor_id=2)
 
     display_control_info(frame, width)
-
+    end_vis = time.time()
     # after drawing points on frames, imshow the frames
     cv2.imshow("Live Camera Feed", frame)
-    cv2.waitKey(0.01)
+    cv2.waitKey(1)
+
     # # Key controls
     # key = cv2.waitKey(wait_ms) & 0xFF
     # if key == ord("q"):  # quit program if 'q' is pressed
@@ -267,4 +290,4 @@ def run_visualization(cam_payload, radar_payload):
     # elif key == ord("p"):  # pause/unpause program if 'p' is pressed
     #     cv2.waitKey(0)
 
-    #cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
