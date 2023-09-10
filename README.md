@@ -10,7 +10,7 @@ git clone https://github.com/hsidd1/MQTT-RadCam-Stream.git
 ```
 Install dependencies via pip:
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 ## Configuration - General
 
@@ -21,7 +21,6 @@ Configuration for this project's key parameters are in [config.yaml](config.yaml
 `mqtt`: Config for MQTT processes
 
 - `broker` (str) and `port` (int): broker address and port number to be connected to in [processModule/serverConnect.py](processModule/serverConnect.py)
- m,,,,,,,,n 
 
 ### Local Host Broker Setup
 
