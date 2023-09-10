@@ -1,6 +1,7 @@
 import cv2 
 import numpy as np
 import json 
+import yaml
 import datetime as dt
 
 """
@@ -10,11 +11,13 @@ run as thread, writes live payload data: ./liveDataLog:
 camera: {topic, sub_ts, pub_ts (matching filename in ./camera_data), frame_id}
  radar: {topic, sub_ts, pub_ts, radar_json (sensor id, x, y, z, tlv, tid, frame)} 
 """
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
+
 IMG_PATH = "./liveDataLog/camera_data/"
 RADCAM_PATH = "./liveDataLog/radcam_log.json"
-SAMPLE_IMG = "./data/sample_frame.png"
-data_array = cv2.imread(SAMPLE_IMG)
-# print(data_array.shape) # (480, 640, 3)
+# SAMPLE_IMG = "./data/sample_frame.png"
+# data_array = cv2.imread(SAMPLE_IMG)
 CAMERA_TOPIC = "data/livecamera"
 RADAR_TOPIC = "data/liveradar"
 
@@ -34,7 +37,9 @@ def save_data(topic: str, payload: bytes | str) -> dict | None:
         cam_ts = payload[-26:].decode("utf-8") # ts is 26 bytes extension
         frame_payload = payload[:-26] # remove timestamp
         frame = np.frombuffer(frame_payload, dtype=np.uint8)
-        frame = frame.reshape(data_array.shape)
+        height = config["LiveData"]["camera"]["height"]
+        width = config["LiveData"]["camera"]["width"]
+        frame = frame.reshape((height, width, 3))
         ts_filename = cam_ts.replace(":", "-").replace(".", "-")
         cv2.imwrite(IMG_PATH + ts_filename + ".jpg", frame)
         # create cam object for json
