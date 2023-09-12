@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 A script to easily delete all logs quickly instead of manually deleting them.
 """

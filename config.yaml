@@ -29,4 +29,4 @@ LiveData:
   camera:
     width: 1280
     height: 720
-    fps: 20 # capped at 9fps for 1280x720, 5fps for 1920x1080, 28 fps for 640x480
+    # fps: 20 # use this to override camera fps

@@ -1,6 +1,6 @@
 from processModule.serverConnect import connect_mqtt
 
-# from visualizationModule.visualization_main import run_visualization
+from visualizationModule.visualization_main import run_visualization
 from threading import Thread
 import yaml
 import json
@@ -25,37 +25,55 @@ RADAR_TOPIC = config["LiveData"]["radar"]["topic"]
 CAMERA_ID = "LIVE CAMERA"
 CAMERA_TOPIC = "data/livecamera"
 
+latest_radar = None
+latest_camera = None
 
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
         t = Thread(target=save_data, args=(msg.topic, msg.payload))
         t.start()
-        cam_payload = radar_payload = None
+        global latest_radar, latest_camera
+        # cam_payload = radar_payload = None
         if msg.topic == RADAR_TOPIC:
-            # process_radar(msg.payload)
+            #process_radar(msg.payload)
             radar_payload = msg.payload
+            latest_radar = radar_payload
+            # radar_data_queue.put(radar_payload)
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
         if msg.topic == CAMERA_TOPIC:
             cam_payload = msg.payload
+            latest_camera = cam_payload
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}\n\n")
             # process_livecam(msg.payload) # display frames in cv2 window w/ timestamp
         try:
+            run_visualization(latest_camera, latest_radar)
             # run_visualization(cam_payload, radar_payload)
-            pass
-        # do nothing if payload is None
         except TypeError:
             pass
 
     client.subscribe(topic)
     client.on_message = on_message
 
+def cam_reciever(client):
+    subscribe(client, topic=CAMERA_TOPIC)
+
+def rad_reciever(client):
+    subscribe(client, topic=RADAR_TOPIC)
+
 
 def main():
+    client = connect_mqtt("PC")
+
+    cam_thread = Thread(target=cam_reciever, args=(client,))
+    rad_thread = Thread(target=rad_reciever, args=(client,))
+
     live_radar_process = subprocess.Popen(["python", "live_radarclient.py"])
     live_cam_process = subprocess.Popen(["python", "live_cameraclient.py"])
-    client = connect_mqtt("PC")
-    subscribe(client, topic=RADAR_TOPIC)
-    subscribe(client, topic=CAMERA_TOPIC)
+
+    # subscribe(client, topic = RADAR_TOPIC)
+    # subscribe(client, topic = CAMERA_TOPIC)
+    cam_thread.start()
+    rad_thread.start()
 
     def exit_handler(client):
         live_radar_process.kill()
@@ -63,6 +81,8 @@ def main():
         live_cam_process.kill()
         print("Live camera process killed.")
         client.disconnect()
+        cam_thread.join()
+        rad_thread.join()
         with open("liveDataLog/radcam_log.json", "r") as f:
             data = f.read()
         try:
@@ -82,6 +102,7 @@ def main():
         exit_handler(client)
     except Exception as e:
         print("RECEIVER: Something went wrong. Exiting Receiver...")
+        #print(e)
         print(traceback.format_exc())
         exit_handler(client)
 

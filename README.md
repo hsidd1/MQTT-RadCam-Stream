@@ -22,7 +22,6 @@ Configuration for this project's key parameters are in [config.yaml](config.yaml
 
 - `broker` (str) and `port` (int): broker address and port number to be connected to in [processModule/serverConnect.py](processModule/serverConnect.py)
 
-
 ### Local Host Broker Setup
 
 This program requires a very rapid subscribe and publish rate which all tested web-based brokers could not accomplish. The workaround here is running on localhost server. 

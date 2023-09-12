@@ -14,25 +14,22 @@ with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 cap = None
 
-
 def publish(client):
     def on_message(client, userdata, message):
-        print("message received ", str(message.payload.decode("utf-8")))
-        print("message topic=", message.topic)
-        print("message qos=", message.qos)
-        print("message retain flag=", message.retain)
-
+        print("message received " ,str(message.payload.decode("utf-8")))
+        print("message topic=",message.topic)
+        print("message qos=",message.qos)
+        print("message retain flag=",message.retain)
     def on_log(client, userdata, level, buf):
-        print("log: ", buf)
-
+        print("log: ",buf)
+        
     if config["mqtt"]["show_log"]:
-        client.on_message = on_message
+        client.on_message=on_message
 
     global cap
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # external camera
+    cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)  # external camera
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config["LiveData"]["camera"]["width"])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config["LiveData"]["camera"]["height"])
-    cap.set(cv2.CAP_PROP_FPS, config["LiveData"]["camera"]["fps"])
     client = connect_mqtt("Camera")
     # num_frames = 120
     # start = time.perf_counter()
@@ -56,7 +53,6 @@ def publish(client):
                 status = res[0]
                 if status == 0:
                     print(f"Send {len(payload)} bytes to topic data/livecamera")
-                    #i += 1
             else:
                 print("No frame received.")
         except KeyboardInterrupt:
@@ -84,7 +80,6 @@ def main():
     if cap.isOpened():
         cap.release()
     cv2.destroyAllWindows()
-
 
 if __name__ == "__main__":
     main()
