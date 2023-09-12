@@ -1,5 +1,4 @@
 import numpy as np
-from .radar_points import RadarData
 import json
 import datetime
 
@@ -34,25 +33,7 @@ def rot_mtx_exit(alpha, beta):
     return calc_rot_matrix(alpha + 180, beta)
 
 
-def load_data_sensorhost(data: json) -> RadarData:
-    radar_points = []
-    for item in data["frames"]:
-        num_ob = item["sensorMessage"]["metadata"]["numOfDetectedObjects"]
-        detected_points = item["sensorMessage"]["object"]["detectedPoints"]
-        timestamp = item["timestamp"]  # world time?
-
-        for j in range(num_ob):
-            s = dict()
-            s["sensorId"] = detected_points[j]["sensorId"]
-            s["x"] = detected_points[j]["x"] * 10  # converting to mm
-            s["y"] = detected_points[j]["y"] * 10
-            s["z"] = detected_points[j]["z"] * 10
-            s["timestamp"] = timestamp
-
-            radar_points.append(s)
-    return RadarData(radar_points)
-
-def load_data_tlv(data: json = None) -> RadarData:
+def load_data_tlv(data: json = None) -> list[dict]:
     radar_points = []
     if data is None:
         # add empty lists for everything
