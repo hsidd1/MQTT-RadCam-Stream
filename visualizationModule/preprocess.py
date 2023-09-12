@@ -53,18 +53,18 @@ def load_data_sensorhost(data: json) -> RadarData:
     return RadarData(radar_points)
 
 def load_data_tlv(data: json = None) -> RadarData:
+    radar_points = []
     if data is None:
         # add empty lists for everything
-        return RadarData([])
+        return radar_points
     if isinstance(data, bytes):
         # decode JSON
         try:
             data = json.loads(data.decode("utf-8"))
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
-            return RadarData([])
+            return radar_points
 
-    radar_points = []
     if isinstance(data, dict):
         # Handle the case when data is a single JSON object
         item = data
