@@ -30,7 +30,7 @@ def save_data(topic: str, payload) -> None:
         cam_ts = payload[-26:].decode("utf-8") # ts is 26 bytes extension
         frame_payload = payload[:-26] # remove timestamp
         frame = np.frombuffer(frame_payload, dtype=np.uint8)
-        frame = frame.reshape(data_array.shape)
+        frame = frame.reshape([720,1280,3])#data_array.shape)
         ts_filename = cam_ts.replace(":", "-").replace(".", "-")
         cv2.imwrite(IMG_PATH + ts_filename + ".jpg", frame)
         # create cam object for json

@@ -12,7 +12,7 @@ data_array = cv2.imread(SAMPLE_IMG)
 def process_frames(frame_payload: bytearray) -> None:
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
-    height, width, channels = data_array.shape
+    height, width, channels = 720,1280,3#data_array.shape
     frame = frame.reshape(height, width, channels)
     cv2.imshow(f"Frame from {config['mqtt']['client_id2']}", frame)
     if config["CameraOutput"]["continuous_frame_mode"]:
@@ -40,7 +40,7 @@ def process_livecam(payload: bytearray) -> None:
     font_scale = 1
     font_color = (255, 255, 255)
     line_type = 2
-    frame = frame.reshape(data_array.shape)
+    frame = frame.reshape([720,1280,3])#data_array.shape)
     cv2.putText(frame, timestamp, bottom_left_corner, font, font_scale, font_color, line_type)
     cv2.imshow("Live Camera Feed", frame)
     if config["CameraOutput"]["continuous_frame_mode"]:

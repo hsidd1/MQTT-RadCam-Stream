@@ -25,24 +25,31 @@ configFileName = 'ODS_6m_default.cfg'
 #configFileName = 'new_cfg.cfg'
 #configFileName = 'demo.cfg'
 write_radar = False
+
+
 CLIport1 = {}
 Dataport1 = {}
 CLIport2 = {}
 Dataport2 = {}
-byteBuffer1 = np.zeros(2**15,dtype = 'uint8')
-byteBuffer2 = np.zeros(2**15,dtype = 'uint8')
-byteBufferLength1 = 0
-byteBufferLength2 = 0
 
+
+byteBuffer1_1 = np.zeros(2**15,dtype = 'uint8')
+byteBuffer1_2 = np.zeros(2**15,dtype = 'uint8')
+byteBufferLength1_1 = 0
+byteBufferLength1_2 = 0
+byteBuffer2_1 = np.zeros(2**15,dtype = 'uint8')
+byteBuffer2_2 = np.zeros(2**15,dtype = 'uint8')
+byteBufferLength2_1 = 0
+byteBufferLength2_2 = 0
 #-------------------------------------------------------------------
 # Function to configure the serial ports and send the data from
 # the configuration file to the radar
 def serialConfig(configFileName):
     
-    global CLIport1
-    global Dataport1
-    global CLIport2
-    global Dataport2
+    global CLIport1, Dataport1
+    global CLIport2, Dataport2
+    global CLIport3, Dataport3
+    global CLIport4, Dataport4
     global yml_config
     # Open the serial ports for the configuration and the data ports
     
@@ -55,29 +62,57 @@ def serialConfig(configFileName):
     str_dataport = yml_config["LiveData"]["radar"]["DataPort"]
     str_cliport2 = yml_config["LiveData"]["radar"]["CLIport2"]
     str_dataport2 = yml_config["LiveData"]["radar"]["DataPort2"]
+    str_cliport3 = yml_config["LiveData"]["radar"]["CLIport3"]
+    str_dataport3 = yml_config["LiveData"]["radar"]["DataPort3"]
+    str_cliport4 = yml_config["LiveData"]["radar"]["CLIport4"]
+    str_dataport4 = yml_config["LiveData"]["radar"]["DataPort4"]
     CLIport1 = serial.Serial(str_cliport, 115200,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=0.3)
     Dataport1 = serial.Serial(str_dataport, 921600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=0.3)
     Dataport1.reset_output_buffer()
+    time.sleep(0.1)
     CLIport2 = serial.Serial(str_cliport2, 115200,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=0.3)
     Dataport2 = serial.Serial(str_dataport2, 921600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=0.3)
     Dataport2.reset_output_buffer()
+    time.sleep(0.1)
     '''
+    CLIport3 = serial.Serial(str_cliport2, 115200,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=1.0)
+    Dataport3 = serial.Serial(str_dataport2, 921600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=1.0)
+    Dataport3.reset_output_buffer()
+    time.sleep(2)
+    CLIport4 = serial.Serial(str_cliport2, 115200,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=1.0)
+    Dataport4 = serial.Serial(str_dataport2, 921600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=1.0)
+    Dataport4.reset_output_buffer()
+    time.sleep(2)
+    
     # flush buffers
     CLIport1.flushInput()
     CLIport1.flushOutput()
     Dataport1.flushInput()
     Dataport1.flushOutput()
+    CLIport2.flushInput()
+    CLIport2.flushOutput()
+    Dataport2.flushInput()
+    Dataport2.flushOutput()
+    CLIport3.flushInput()
+    CLIport3.flushOutput()
+    Dataport3.flushInput()
+    Dataport3.flushOutput()
+    CLIport4.flushInput()
+    CLIport4.flushOutput()
+    Dataport4.flushInput()
+    Dataport4.flushOutput()
     '''
     # Read the configuration file and send it to the board
     config = [line.rstrip('\r\n') for line in open(configFileName)]
     for i in config:
         CLIport1.write((i+'\n').encode())
-        #print(i)
-        time.sleep(0.01)
+        time.sleep(0.03)
     
     
     # on reconnect, wait for the port to come back
-    time.sleep(1)
+    time.sleep(3)
+    CLIport1.reset_input_buffer()
+    #CLIport1.close()
     '''
     # flush buffers
     CLIport2.flushInput()
@@ -87,10 +122,20 @@ def serialConfig(configFileName):
     '''
     for i in config:
         CLIport2.write((i+'\n').encode())
-        #print(i)
+        time.sleep(0.03)
+    time.sleep(3)
+    CLIport2.reset_input_buffer()
+    '''
+    for i in config:
+        CLIport3.write((i+'\n').encode())
         time.sleep(0.01)
-        
-    return CLIport1, Dataport1, CLIport2, Dataport2
+    time.sleep(0.5)
+    for i in config:
+        CLIport4.write((i+'\n').encode())
+        time.sleep(0.01)    
+    time.sleep(0.5)
+    '''
+    return CLIport1, Dataport1, CLIport2, Dataport2, CLIport2, Dataport2, CLIport2, Dataport2
 # ------------------------------------------------------------------
 
 # Function to parse the data inside the configuration file
@@ -212,7 +257,7 @@ def tlvHeaderDecode(data):
     return tlvType, tlvLength
 
 
-def readAndParseData(Dataport1, configParameters, client, sensor_id, byteBuffer, byteBufferLength):
+def readAndParseData(Dataport, configParameters, client, sensor_id, byteBuffer, byteBufferLength):
     #global byteBuffer, byteBufferLength
     
     ####################################TLV types:###############################
@@ -223,7 +268,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id, byteBuffer,
     MMWDEMO_OUTPUT_MSG_COMPRESSED_POINTS = 1020    
     
     maxBufferSize = 2**15
-    magicWord = [2, 1, 4, 3, 6, 5, 8, 7]
+    magicWord = bytearray(b'\x02\x01\x04\x03\x06\x05\x08\x07')#[2, 1, 4, 3, 6, 5, 8, 7]
     
     # Initialize variables
     magicOK = 0 # Checks if magic number has been read
@@ -231,7 +276,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id, byteBuffer,
     frameNumber = 0
     detObj = {}
     detObj_log  = None
-    readBuffer = Dataport1.read(Dataport1.in_waiting)
+    readBuffer = Dataport.read(Dataport.in_waiting)
     print('----------------------------------------------------------------------------------------------')
     '''
     with open('data_serial_log.txt', 'a') as file:
@@ -323,7 +368,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id, byteBuffer,
 
         # UNCOMMENT IN CASE OF SDK 2
         #subFrameNumber = np.matmul(byteBuffer[idX:idX+4],word)
-        #print(numTLVs)
+        #print('numTLVs is:'+str(numTLVs))
         
         # Read the TLV messages
         for tlvIdx in range(numTLVs):
@@ -334,7 +379,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id, byteBuffer,
             # Check the header of the TLV message
             #print(f"byteBuffer[idX:idX+4] = {byteBuffer[idX:idX+4]}, word = {word}")
             tlv_type, tlv_length= tlvHeaderDecode(byteBuffer[idX:idX+8])
-            
+            #print('tlv_type is'+str(tlv_type))
             #tlv_type = np.matmul(byteBuffer[idX:idX+4],word)
             idX += 4
             #print('tlv_type is: '+str(tlv_type))
@@ -405,7 +450,7 @@ def readAndParseData(Dataport1, configParameters, client, sensor_id, byteBuffer,
                 # Compute Z
                 # Range * sin (elevation)
                 pointCloud[:,2] = sphericalPointCloud[:,0] * np.sin(sphericalPointCloud[:,2])
-                detObj = {"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id),"TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
+                #detObj = {"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id),"TLV_type":tlv_type,"frame":frameNumber, "x": pointCloud[:,0], "y": pointCloud[:,1], "z": pointCloud[:,2]}
                 detObj_log = json.dumps({"time":datetime.now().strftime("%H:%M:%S.%f"),"Sensor_id": int(sensor_id),"TLV_type":int(tlv_type),"frame":int(frameNumber), "x": pointCloud[:,0].tolist(), "y": pointCloud[:,1].tolist(), "z": pointCloud[:,2].tolist()})
                 if write_radar:
                     with open('data/tlv_data_log.json', 'a') as file:
@@ -512,49 +557,24 @@ def update(client):
      
     dataOk = 0
     global detObj
-    global byteBuffer1, byteBufferLength1
-    global byteBuffer2, byteBufferLength2
+    
     x = []
     y = []
-      
-    # Read and parse the received data
-    dataOk, frameNumber, detObj, byteBuffer1, byteBufferLength1 = readAndParseData(Dataport1, configParameters, client, sensor_id=1, byteBuffer=byteBuffer1, byteBufferLength=byteBufferLength1)
-    time.sleep(0.05) 
-    dataOk, frameNumber, detObj, byteBuffer2, byteBufferLength2 = readAndParseData(Dataport2, configParameters, client, sensor_id=2, byteBuffer=byteBuffer2, byteBufferLength=byteBufferLength2)
-    #print(f"dataOK = {dataOk}")
-    #if dataOk and len(detObj["x"]) > 0:
-        #print(detObj)
-        #update_demo(detObj)
+    global byteBuffer1_1, byteBufferLength1_1, byteBuffer1_2, byteBufferLength1_2
+    global byteBuffer2_1, byteBufferLength2_1, byteBuffer2_2, byteBufferLength2_2
     
-    return True, True#dataOk, dataOk2
-
-# -------------------------    MAIN   -----------------------------------------  
-
-# Configurate the serial port
-if __name__ == "__main__":
-    CLIport1, Dataport1, CLIport2, Dataport2 = serialConfig(configFileName)
-    status = (CLIport1.isOpen(), CLIport2.isOpen(), Dataport1.isOpen(), Dataport2.isOpen())
-    print(status)
-    time.sleep(0.1)
-    #CLIport2, Dataport2 = serialConfig2(configFileName)
-
-    # Get the configuration parameters from the configuration file
-    configParameters = parseConfigFile(configFileName)
-
-    CLIport1.write(('sensorStart\n').encode())
-    CLIport2.write(('sensorStart\n').encode())
-
     detObj = {}  
-    client = connect_mqtt(CLIENT_ID) 
-    time.sleep(1)
     while True:
         try:
-            # Update the data and check if the data is okay
-            client.loop_start()
-            dataOk1, dataOk2 = update(client)
-            
-            time.sleep(0.03) 
-            client.loop_stop()
+        # Update the data and check if the data is okay
+            # Read and parse the received data
+            dataOk, frameNumber, detObj, byteBuffer1_1, byteBufferLength1_1 = readAndParseData(Dataport1, configParameters, client, sensor_id=1, byteBuffer=byteBuffer1_1, byteBufferLength=byteBufferLength1_1)
+
+            dataOk, frameNumber, detObj, byteBuffer1_2, byteBufferLength1_2 = readAndParseData(Dataport2, configParameters, client, sensor_id=2, byteBuffer=byteBuffer1_2, byteBufferLength=byteBufferLength1_2)
+            time.sleep(0.05) 
+            #dataOk, frameNumber, detObj, byteBuffer2_1, byteBufferLength2_1 = readAndParseData(Dataport3, configParameters, client, sensor_id=3, byteBuffer=byteBuffer2_1, byteBufferLength=byteBufferLength2_1)
+            #time.sleep(0.05) 
+            #dataOk, frameNumber, detObj, byteBuffer2_2, byteBufferLength2_2 = readAndParseData(Dataport4, configParameters, client, sensor_id=4, byteBuffer=byteBuffer2_2, byteBufferLength=byteBufferLength2_2)
 
         # Stop the program and close everything if Ctrl + c is pressed
         except KeyboardInterrupt:
@@ -565,12 +585,49 @@ if __name__ == "__main__":
             #print(e)
             print(traceback.format_exc())          
             break
+
+
+        
+    
+    return True, True#dataOk, dataOk2
+
+# ------------------------------------------    MAIN   -----------------------------------------  
+
+# Configurate the serial port
+if __name__ == "__main__":
+    CLIport1, Dataport1, CLIport2, Dataport2, CLIport3, Dataport3, CLIport4, Dataport4 = serialConfig(configFileName)
+    status = (CLIport1.isOpen(), CLIport2.isOpen(), Dataport1.isOpen(), Dataport2.isOpen())
+    print(status)
+    time.sleep(0.1)
+    #CLIport2, Dataport2 = serialConfig2(configFileName)
+
+    # Get the configuration parameters from the configuration file
+    configParameters = parseConfigFile(configFileName)
+
+    #CLIport1.write(('sensorStart\n').encode())
+    #CLIport2.write(('sensorStart\n').encode())
+    #CLIport3.write(('sensorStart\n').encode())
+    #CLIport4.write(('sensorStart\n').encode())
+    client = connect_mqtt(CLIENT_ID) 
+    time.sleep(1)
+    client.loop_start()
+    dataOk1, dataOk2 = update(client)
+            
+    time.sleep(0.03) 
+    client.loop_stop()
+    
     CLIport1.write(('sensorStop\n').encode())
     CLIport2.write(('sensorStop\n').encode())
+    CLIport3.write(('sensorStop\n').encode())
+    CLIport4.write(('sensorStop\n').encode())
     CLIport1.close()
     CLIport2.close()
+    CLIport3.close()
+    CLIport4.close()
     Dataport1.close()
     Dataport2.close()
+    Dataport3.close()
+    Dataport4.close()
     print(f"CLIport status: {CLIport1.is_open}")
     print(f"Dataport status: {Dataport1.is_open}")
     print(f"CLIport status: {CLIport2.is_open}")
