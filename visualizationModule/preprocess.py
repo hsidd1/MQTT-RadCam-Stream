@@ -3,6 +3,7 @@ from .radar_points import RadarData
 import json
 import datetime
 
+
 # for entry sensor
 def calc_rot_matrix(alpha, beta):
     """alpha is the angle along z axis - yaw
@@ -52,6 +53,7 @@ def load_data_sensorhost(data: json) -> RadarData:
             radar_points.append(s)
     return RadarData(radar_points)
 
+
 def load_data_tlv(data: json = None) -> RadarData:
     if data is None:
         # add empty lists for everything
@@ -64,12 +66,16 @@ def load_data_tlv(data: json = None) -> RadarData:
             s["x"] = item["x"][j] * 1000  # converting to mm
             s["y"] = item["y"][j] * 1000
             s["z"] = item["z"][j] * 1000
-            #s["timestamp"] = int(item["time"].replace(":","").replace(".",""))
+            # s["timestamp"] = int(item["time"].replace(":","").replace(".",""))
             time_str = item["time"]
             time_obj = datetime.datetime.strptime(time_str, "%H:%M:%S.%f")
 
             # convert datetime to milliseconds
-            milliseconds = int(time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second) * 1000 + time_obj.microsecond // 1000
+            milliseconds = (
+                int(time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second)
+                * 1000
+                + time_obj.microsecond // 1000
+            )
             s["timestamp"] = milliseconds
             radar_points.append(s)
 

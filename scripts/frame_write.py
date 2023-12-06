@@ -10,7 +10,7 @@ object is extremely large
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cap = cv2.VideoCapture(config["Files"]["video_file"])
     ret, frame = cap.read()
     with open("data/sample_frame.txt", "a") as f:

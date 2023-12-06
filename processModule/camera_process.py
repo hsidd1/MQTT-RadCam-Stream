@@ -1,6 +1,6 @@
 import numpy as np
-import yaml 
-import cv2 
+import yaml
+import cv2
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -8,6 +8,7 @@ with open("config.yaml", "r") as f:
 # cv2.namedWindow(f"Frame from {config['mqtt']['client_id2']}", cv2.WINDOW_NORMAL)
 SAMPLE_IMG = "data/sample_frame.png"
 data_array = cv2.imread(SAMPLE_IMG)
+
 
 # used in pre-recorded data playback
 def process_frames(frame_payload: bytearray) -> None:
@@ -21,15 +22,16 @@ def process_frames(frame_payload: bytearray) -> None:
     else:
         cv2.waitKey(0)
 
+
 # used in live data playback
 def process_livecam(payload: bytearray) -> None:
     timestamp = payload[-26:].decode("utf-8")
     # print("Timestamp: ", timestamp)
-    frame_payload = payload[:-26] # remove timestamp
+    frame_payload = payload[:-26]  # remove timestamp
 
     # convert byte array to numpy array for cv2 to read
     frame = np.frombuffer(frame_payload, dtype=np.uint8)
-    if not hasattr(process_livecam, 'window_created'):
+    if not hasattr(process_livecam, "window_created"):
         cv2.namedWindow("Live Camera Feed")
         process_livecam.window_created = True
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -37,8 +39,10 @@ def process_livecam(payload: bytearray) -> None:
     font_scale = 1
     font_color = (255, 255, 255)
     line_type = 2
-    frame = frame.reshape(data_array.shape) # (480, 640, 3)
-    cv2.putText(frame, timestamp, bottom_left_corner, font, font_scale, font_color, line_type)
+    frame = frame.reshape(data_array.shape)  # (480, 640, 3)
+    cv2.putText(
+        frame, timestamp, bottom_left_corner, font, font_scale, font_color, line_type
+    )
     cv2.imshow("Live Camera Feed", frame)
     if config["CameraOutput"]["continuous_frame_mode"]:
         cv2.waitKey(1)

@@ -1,11 +1,14 @@
 import pytest
-#from unittest.mock import MagicMock, patch
-#from receiver_main import process_frames
-#import cv2
+
+# from unittest.mock import MagicMock, patch
+# from receiver_main import process_frames
+# import cv2
+
 
 # placeholder for until tests are required
 def test_placeholder():
     assert True
+
 
 # with open("data/sample_frame.txt", "r") as f:
 #     sample_frame = f.read()

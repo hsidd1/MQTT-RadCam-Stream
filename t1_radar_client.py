@@ -11,26 +11,30 @@ with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 CLIENT_ID = config["mqtt"]["client_id1"]
 
+
 def publish(client, data=data):
     def on_message(client, userdata, message):
-        print("message received " ,str(message.payload.decode("utf-8")))
-        print("message topic=",message.topic)
-        print("message qos=",message.qos)
-        print("message retain flag=",message.retain)
+        print("message received ", str(message.payload.decode("utf-8")))
+        print("message topic=", message.topic)
+        print("message qos=", message.qos)
+        print("message retain flag=", message.retain)
+
     def on_log(client, userdata, level, buf):
-        print("log: ",buf)
-        
+        print("log: ", buf)
+
     if config["mqtt"]["show_log"]:
-        client.on_message=on_message
-        #client.on_log=on_log
+        client.on_message = on_message
+        # client.on_log=on_log
 
     while True:
         for i in range(0, len(data), 10):
             time.sleep(4)
-            msg = data[i:i+10]  # modify to publish based on timestamps for intervals
-            data = data[i+10:]
+            msg = data[
+                i : i + 10
+            ]  # modify to publish based on timestamps for intervals
+            data = data[i + 10 :]
             if not msg:
-                break # stop once msg becomes empty list 
+                break  # stop once msg becomes empty list
             # for demo/debug: only send 2 objects from the data slice
             if config["mqtt"]["compressed_output"]:
                 msg = msg[:2]
@@ -43,19 +47,21 @@ def publish(client, data=data):
         if not data:
             break
 
+
 def run():
     try:
-        client = connect_mqtt(CLIENT_ID) 
+        client = connect_mqtt(CLIENT_ID)
         client.loop_start()
         publish(client)
         client.loop_stop()
-    except KeyboardInterrupt:     
+    except KeyboardInterrupt:
         print("Radar Process Terminated. Exiting Radar Client...")
         client.disconnect()
     except Exception as e:
         print("Something went wrong. Exiting Radar Client...")
         print(e)
         client.disconnect()
+
 
 if __name__ == "__main__":
     run()

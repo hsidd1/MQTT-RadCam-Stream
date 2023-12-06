@@ -7,6 +7,7 @@ with open("config.yaml", "r") as f:
 broker = config["mqtt"]["broker"]
 port = config["mqtt"]["port"]
 
+
 def connect_mqtt(client_id) -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -20,6 +21,7 @@ def connect_mqtt(client_id) -> mqtt_client:
     client.on_disconnect = on_disconnect
     client.connect(broker, port)
     return client
+
 
 def on_disconnect(client, userdata, rc):
     if rc != 0:

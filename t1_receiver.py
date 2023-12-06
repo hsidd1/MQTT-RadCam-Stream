@@ -25,37 +25,42 @@ if os.path.exists(LOG_FILE):
         idx += 1
     log_file_path = f"{base}_{idx}{ext}"
 
+
 def subscribe(client, topic):
     def on_message(client, userdata, msg):
         if msg.topic == "data/camera/frame":
             print(f"Received {len(msg.payload)} bytes from topic {msg.topic}")
-            process_frames(msg.payload) # display frames in cv2 window
+            process_frames(msg.payload)  # display frames in cv2 window
             msg_decode = str(bytearray(msg.payload))
         else:
             print(f"Received {msg.payload.decode()} from topic {msg.topic}")
             msg_decode = msg.payload.decode()
         if config["write_log"]:
             with open(LOG_FILE, "a") as f:
-                f.write(f"{dt.datetime.now().isoformat()}: Received {msg_decode} from {msg.topic}\n")
+                f.write(
+                    f"{dt.datetime.now().isoformat()}: Received {msg_decode} from {msg.topic}\n"
+                )
 
     client.subscribe(topic)
     client.on_message = on_message
+
 
 def main():
     camera_process = subprocess.Popen(["python", "cam_client.py"])
     radar_process = subprocess.Popen(["python", "radar_client.py"])
     client = connect_mqtt("PC")
-    subscribe(client, topic = "data/radar")
-    subscribe(client, topic = "data/camera/frame")
-    #subscribe(client, topic = "data/camera/ts")
+    subscribe(client, topic="data/radar")
+    subscribe(client, topic="data/camera/frame")
+    # subscribe(client, topic = "data/camera/ts")
 
     def exit_handler(client):
         camera_process.kill()
-        print("Camera process killed.") 
+        print("Camera process killed.")
         radar_process.kill()
-        print("Radar process killed.") # RIP my friends
+        print("Radar process killed.")  # RIP my friends
         client.disconnect()
         cv2.destroyAllWindows()
+
     try:
         client.loop_forever()
     except KeyboardInterrupt:
@@ -65,6 +70,7 @@ def main():
         print("Something went wrong. Exiting Receiver...")
         print(e)
         exit_handler(client)
+
 
 if __name__ == "__main__":
     main()

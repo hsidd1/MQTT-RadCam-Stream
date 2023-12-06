@@ -29,7 +29,7 @@ def publish(client):
         client.on_message = on_message
 
     global cap
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # external camera
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # update index for external camera
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config["LiveData"]["camera"]["width"])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config["LiveData"]["camera"]["height"])
     cap.set(cv2.CAP_PROP_FPS, config["LiveData"]["camera"]["fps"])
@@ -56,13 +56,14 @@ def publish(client):
                 status = res[0]
                 if status == 0:
                     print(f"Send {len(payload)} bytes to topic data/livecamera")
-                    #i += 1
+                    # i += 1
             else:
                 print("No frame received.")
         except KeyboardInterrupt:
             print("LIVE CAMERA: Process Terminated. Exiting Camera...")
             break
-    #print(f"FPS is {num_frames/(time.perf_counter()-start)}")
+    # print(f"FPS is {num_frames/(time.perf_counter()-start)}")
+
 
 def main():
     try:

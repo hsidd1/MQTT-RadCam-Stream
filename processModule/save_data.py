@@ -1,4 +1,4 @@
-import cv2 
+import cv2
 import numpy as np
 import json, yaml
 import datetime as dt
@@ -20,6 +20,7 @@ RADAR_TOPIC = "data/liveradar"
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
+
 def save_data(topic: str, payload: bytes | str) -> dict | None:
     """
     saves live camera frames and radar data to ./liveDataLog/camera_data and ./liveDataLog/radcam_log.json
@@ -33,8 +34,8 @@ def save_data(topic: str, payload: bytes | str) -> dict | None:
     sub_ts = str(dt.datetime.now().isoformat())
     if topic == CAMERA_TOPIC:
         save_data.frame_id += 1
-        cam_ts = payload[-26:].decode("utf-8") # ts is 26 bytes extension
-        frame_payload = payload[:-26] # remove timestamp
+        cam_ts = payload[-26:].decode("utf-8")  # ts is 26 bytes extension
+        frame_payload = payload[:-26]  # remove timestamp
         frame = np.frombuffer(frame_payload, dtype=np.uint8)
         height = config["LiveData"]["camera"]["height"]
         width = config["LiveData"]["camera"]["width"]
@@ -46,7 +47,7 @@ def save_data(topic: str, payload: bytes | str) -> dict | None:
             "topic": topic,
             "sub_ts": sub_ts,
             "pub_ts": cam_ts,
-            "frame_id": save_data.frame_id
+            "frame_id": save_data.frame_id,
         }
     # save radar data
     if topic == RADAR_TOPIC:
@@ -59,7 +60,7 @@ def save_data(topic: str, payload: bytes | str) -> dict | None:
         except json.JSONDecodeError:
             radar_object2 = {"radar_payload": payload.decode("utf-8")}
         radar_object = {**radar_object1, **radar_object2}
-    
+
     with open(RADCAM_PATH, "a") as f:
         if f.tell() == 0:
             f.write("[")
@@ -69,6 +70,7 @@ def save_data(topic: str, payload: bytes | str) -> dict | None:
             json.dump(cam_object, f)
         if radar_object:
             json.dump(radar_object, f)
+
 
 """
 class CamPayload:

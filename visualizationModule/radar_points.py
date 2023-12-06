@@ -57,8 +57,10 @@ class RadarFrame:
     def points_for_clustering(self) -> list:
         points_list = []
         for i, status in enumerate(self.is_static):
-            if status == 0: # if point is not static
-                points_list.append((self.x[i], self.y[i], self.z[i])) # for actual z value
+            if status == 0:  # if point is not static
+                points_list.append(
+                    (self.x[i], self.y[i], self.z[i])
+                )  # for actual z value
                 # points_list.append((self.x[i], self.y[i], 0)) # flatten z value
                 print(self.sid)
         return points_list
@@ -80,8 +82,9 @@ class RadarFrame:
             else:
                 self.is_static[i] = 0
 
-    def frame_transform_coord(self, s1_rotz, s1_rotx, s2_rotz, s2_rotx, 
-                        offsetx, offsety, offsetz):
+    def frame_transform_coord(
+        self, s1_rotz, s1_rotx, s2_rotz, s2_rotx, offsetx, offsety, offsetz
+    ):
         for i in range(len(self.x)):
             xyz = np.asmatrix(([self.x[i]], [self.y[i]], [self.z[i]]))  # cm to mm
             if self.sid[i] == 1:
@@ -97,6 +100,7 @@ class RadarFrame:
             self.x[i] = float(xyz_transformed[0])
             self.y[i] = float(xyz_transformed[1])
             self.z[i] = float(xyz_transformed[2])
+
 
 class RadarData:
     def __init__(self, data: "list[dict[str, int or float]]"):
@@ -125,7 +129,7 @@ class RadarData:
             self.z.append(item["z"])
             self.ts.append(item["timestamp"])
         self.__time_elapsed = 0
-        self.__initial_timestamp = None  
+        self.__initial_timestamp = None
 
     def __repr__(self):
         class_str = f"RadarData object: {self.get_num_sensors()} sensors. "
@@ -153,8 +157,9 @@ class RadarData:
     def has_data(self) -> bool:
         return len(self.x) > 0
 
-    def transform_coord(self, s1_rotz, s1_rotx, s2_rotz, s2_rotx, 
-                        offsetx, offsety, offsetz):
+    def transform_coord(
+        self, s1_rotz, s1_rotx, s2_rotz, s2_rotx, offsetx, offsety, offsetz
+    ):
         """Apply coordinate transformation."""
         if self.transformed:
             print("Warning: RadarData already transformed. No action taken.")
